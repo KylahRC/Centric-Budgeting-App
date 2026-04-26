@@ -12,7 +12,8 @@ import com.google.firebase.auth.FirebaseUser
 
 class MainActivity : ComponentActivity() {
     var auth: FirebaseAuth? = null
-    var button: Button? = null
+    var button1: Button? = null
+    var button2: Button? = null
     var textView: TextView? = null
     var user: FirebaseUser? = null
 
@@ -22,7 +23,8 @@ class MainActivity : ComponentActivity() {
         setContentView(R.layout.activity_main)
 
         auth = FirebaseAuth.getInstance()
-        button = findViewById<Button>(R.id.logout)
+        button1 = findViewById<Button>(R.id.logout)
+        button2 = findViewById<Button>(R.id.dont_log_out)
         textView = findViewById<TextView>(R.id.user_details)
         user = auth!!.getCurrentUser()
 
@@ -31,12 +33,22 @@ class MainActivity : ComponentActivity() {
             startActivity(intent)
             finish()
         } else {
+            val intent = Intent(getApplicationContext(), HomeActivity::class.java)
+            startActivity(intent)
+            finish()
             textView!!.setText(user!!.getEmail())
         }
-        button!!.setOnClickListener(object : View.OnClickListener {
+        button1?.setOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View?) {
                 FirebaseAuth.getInstance().signOut()
                 val intent = Intent(getApplicationContext(), Login::class.java)
+                startActivity(intent)
+                finish()
+            }
+        })
+        button2?.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View?) {
+                val intent = Intent(getApplicationContext(), HomeActivity::class.java)
                 startActivity(intent)
                 finish()
             }

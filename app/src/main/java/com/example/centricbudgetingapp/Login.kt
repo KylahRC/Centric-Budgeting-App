@@ -29,7 +29,7 @@ class Login : AppCompatActivity() {
         // Check if user is signed in (non-null)
         val currentUser = mAuth!!.getCurrentUser()
         if (currentUser != null) {
-            val intent = Intent(getApplicationContext(), MainActivity::class.java)
+            val intent = Intent(getApplicationContext(), HomeActivity::class.java)
             startActivity(intent)
             finish()
         }

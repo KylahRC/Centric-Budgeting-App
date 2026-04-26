@@ -15,14 +15,19 @@
         android:id="@+id/user_details"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello Dr Steven" />
+        android:textAlignment="center"
+        android:text="User already logged in, would you like to continue on this account?" />
     <Button
         android:text="@string/logout"
         android:id="@+id/logout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
-
+        />
+    <Button
+        android:text="Continue"
+        android:id="@+id/dont_log_out"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         />
 
 </LinearLayout>

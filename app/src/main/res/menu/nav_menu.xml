@@ -18,4 +18,9 @@
     <item
         android:id="@+id/nav_category_totals"
         android:title="Category Totals"/>
+    <item
+        android:title="Logout"
+        android:id="@+id/nav_logout"
+        />
+
 </menu>
