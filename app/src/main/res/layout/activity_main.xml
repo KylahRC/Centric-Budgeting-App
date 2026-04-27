@@ -11,6 +11,7 @@
 
 
 
+
     <TextView
         android:id="@+id/user_details"
         android:layout_width="wrap_content"
