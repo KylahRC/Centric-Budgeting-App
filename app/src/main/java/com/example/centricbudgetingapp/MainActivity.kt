@@ -7,8 +7,10 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.activity.ComponentActivity
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.firestore
 
 class MainActivity : ComponentActivity() {
     var auth: FirebaseAuth? = null
@@ -16,6 +18,9 @@ class MainActivity : ComponentActivity() {
     var button2: Button? = null
     var textView: TextView? = null
     var user: FirebaseUser? = null
+    val db = Firebase.firestore
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
+    //val userRef = db.collection("users").document(userId!!)
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
