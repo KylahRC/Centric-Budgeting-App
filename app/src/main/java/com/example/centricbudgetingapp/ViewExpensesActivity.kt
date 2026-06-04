@@ -1,42 +1,39 @@
 package com.example.centricbudgetingapp
 
-import android.os.Bundle
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.os.Bundle
 import android.widget.ImageButton
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.firestore
 
 class ViewExpensesActivity : AppCompatActivity() {
-    //db firebase calls and vals
-    val db = Firebase.firestore
-    val userId = FirebaseAuth.getInstance().currentUser?.uid
-    val userRef = db.collection("users").document(userId!!)
-
-    //other vals
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navigationView: NavigationView
     private lateinit var menuButton: ImageButton
+    private lateinit var expenseListText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_view_expenses)
 
-        //this drawer thing is the left menu
+        setupDrawer()
+
+        expenseListText = findViewById(R.id.tvExpenseList)
+        loadExpenses()
+    }
+
+    private fun setupDrawer()
+    {
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
         menuButton = findViewById(R.id.btnMenu)
 
-        //when you tap the button then the menu opens
-        menuButton.setOnClickListener {
-            drawerLayout.openDrawer(GravityCompat.START)
-        }
-
-        //the options on the menu
+        menuButton.setOnClickListener { drawerLayout.openDrawer(GravityCompat.START) }
         navigationView.setNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> startActivity(Intent(this, HomeActivity::class.java))
@@ -46,7 +43,6 @@ class ViewExpensesActivity : AppCompatActivity() {
                 R.id.nav_view_expenses -> startActivity(Intent(this, ViewExpensesActivity::class.java))
                 R.id.nav_category_totals -> startActivity(Intent(this, CategoryTotalsActivity::class.java))
                 R.id.nav_logout -> {
-                    //needed a way to have the users log out
                     FirebaseAuth.getInstance().signOut()
                     val intent = Intent(this, Login::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -54,9 +50,32 @@ class ViewExpensesActivity : AppCompatActivity() {
                     finish()
                 }
             }
-            //closes the menu
             drawerLayout.closeDrawer(GravityCompat.START)
             true
+        }
+    }
+    @SuppressLint("SetTextI18n")
+    private fun loadExpenses() {
+        // First load categories into a map
+        FirebaseInteractions.getCategories { categories ->
+            val categoryMap = categories.associate { it.id to (it.name ?: "Unnamed") }
+
+            // Then load expenses
+            FirebaseInteractions.getExpenses { expenses ->
+                if (expenses.isEmpty()) {
+                    expenseListText.text = "No expenses found."
+                } else {
+                    val builder = StringBuilder()
+                    for (exp in expenses) {
+                        val categoryName = categoryMap[exp.categoryId] ?: "Unknown"
+                        builder.append("• ${exp.description ?: "No description"}\n")
+                        builder.append("  Amount: ${exp.amount ?: 0.0}\n")
+                        builder.append("  Category: $categoryName\n")
+                        builder.append("  Date: ${exp.date ?: "Unknown"}\n\n")
+                    }
+                    expenseListText.text = builder.toString()
+                }
+            }
         }
     }
 }

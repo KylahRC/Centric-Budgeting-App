@@ -11,19 +11,18 @@ data class UserData(
 )
 
 data class Category(
-    val id: String = "",
-    val name: String? = null,
-    val description: String? = null
+    val id: String,
+    val name: String?,
+    val description: String?
 )
 
 data class Expense(
-    val id: String = "",
+    val id: String,
     val amount: Double? = null,
     val description: String? = null,
     val categoryId: String? = null,
     val photoUrl: String? = null,
-    val date: Long? = null,
-    val startTime: Long? = null,
-    val endTime: Long? = null
+    val date: String? = null   // formatted YYYY-MM-DD string
 )
+
 

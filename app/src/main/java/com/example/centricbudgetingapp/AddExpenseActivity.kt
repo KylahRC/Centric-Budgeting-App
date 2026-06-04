@@ -1,45 +1,53 @@
 package com.example.centricbudgetingapp
 
 import android.annotation.SuppressLint
-import android.os.Bundle
+import android.app.DatePickerDialog
 import android.content.Intent
-import android.widget.ImageButton
+import android.os.Bundle
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.firestore
+import java.util.*
 
+@Suppress("DEPRECATION")
 class AddExpenseActivity : AppCompatActivity() {
 
-    //db firebase calls and vals
-    val db = Firebase.firestore
-    val userId = FirebaseAuth.getInstance().currentUser?.uid
-    val userRef = db.collection("users").document(userId!!)
-
-    //other vals
+    // UI
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navigationView: NavigationView
     private lateinit var menuButton: ImageButton
+    private lateinit var categorySpinner: Spinner
+    private lateinit var amountField: EditText
+    private lateinit var descriptionField: EditText
+    private lateinit var dateField: EditText
+    private lateinit var saveButton: Button
 
+    // Data
+    private var categoryIds: List<String> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_expense)
 
-        //this drawer thing is the left menu
+        setupDrawer()
+        getCategories()
+
+        // --- Date Picker ---
+        dateField.setOnClickListener { showDatePicker(dateField) }
+
+        // --- Save Expense ---
+        saveButton.setOnClickListener { saveExpense() }
+    }
+
+    private fun setupDrawer() {
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
         menuButton = findViewById(R.id.btnMenu)
 
-        //when you tap the button then the menu opens
-        menuButton.setOnClickListener {
-            drawerLayout.openDrawer(GravityCompat.START)
-        }
-
-        //the options on the menu
+        menuButton.setOnClickListener { drawerLayout.openDrawer(GravityCompat.START) }
         navigationView.setNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> startActivity(Intent(this, HomeActivity::class.java))
@@ -49,7 +57,6 @@ class AddExpenseActivity : AppCompatActivity() {
                 R.id.nav_view_expenses -> startActivity(Intent(this, ViewExpensesActivity::class.java))
                 R.id.nav_category_totals -> startActivity(Intent(this, CategoryTotalsActivity::class.java))
                 R.id.nav_logout -> {
-                    //needed a way to have the users log out
                     FirebaseAuth.getInstance().signOut()
                     val intent = Intent(this, Login::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -57,9 +64,79 @@ class AddExpenseActivity : AppCompatActivity() {
                     finish()
                 }
             }
-            //closes the menu
             drawerLayout.closeDrawer(GravityCompat.START)
             true
+        }
+    }
+
+    private fun getCategories()
+    {
+        categorySpinner = findViewById(R.id.spCategory)
+        amountField = findViewById(R.id.etAmount)
+        descriptionField = findViewById(R.id.etDescription)
+        dateField = findViewById(R.id.etDate)
+        saveButton = findViewById(R.id.btnSaveExpense)
+
+        FirebaseInteractions.getCategories { categories ->
+            val categoryNames = categories.map { it.name ?: "Unnamed" }
+            categoryIds = categories.map { it.id }
+
+            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categoryNames)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            categorySpinner.adapter = adapter
+        }
+    }
+
+    @SuppressLint("DefaultLocale")
+    private fun showDatePicker(dateField: EditText) {
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+        val datePicker = DatePickerDialog(
+            this,
+            android.R.style.Theme_Holo_Light_Dialog_NoActionBar, // spinner style
+            { _, selectedYear, selectedMonth, selectedDay ->
+                val formatted = String.format("%04d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay)
+                dateField.setText(formatted)
+            },
+            year,
+            month,
+            day
+        )
+
+        datePicker.datePicker.calendarViewShown = false
+        datePicker.datePicker.spinnersShown = true
+        datePicker.show()
+    }
+
+    private fun saveExpense() {
+        val amount = amountField.text.toString().toDoubleOrNull()
+        val description = descriptionField.text.toString().trim()
+        val selectedIndex = categorySpinner.selectedItemPosition
+        val categoryId = categoryIds.getOrNull(selectedIndex) ?: ""
+        val dateText = dateField.text.toString().trim()
+
+        if (amount != null && description.isNotEmpty() && categoryId.isNotEmpty() && dateText.isNotEmpty()) {
+            FirebaseInteractions.addExpense(
+                amount = amount,
+                description = description,
+                categoryId = categoryId,
+                date = dateText
+            ) { success ->
+                if (success) {
+                    Toast.makeText(this, "Expense added successfully", Toast.LENGTH_SHORT).show()
+                    amountField.text.clear()
+                    descriptionField.text.clear()
+                    dateField.text.clear()
+                    categorySpinner.setSelection(0)
+                } else {
+                    Toast.makeText(this, "Failed to add expense", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } else {
+            Toast.makeText(this, "Fill in all fields", Toast.LENGTH_SHORT).show()
         }
     }
 }

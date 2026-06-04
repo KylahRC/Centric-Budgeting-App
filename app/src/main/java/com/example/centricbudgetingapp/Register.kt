@@ -1,118 +1,164 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.centricbudgetingapp
 
-import android.content.ContentValues
-import android.content.Context
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.text.TextUtils
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.gms.tasks.Task
 import com.google.android.material.textfield.TextInputEditText
-import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
+import java.util.Calendar
+import android.app.DatePickerDialog
 
-//import androidx.activity.enableEdgeToEdge;
 class Register : AppCompatActivity() {
-    //Declare the object
-    var editTextEmail: TextInputEditText? = null
-    var editTextPassword: TextInputEditText? = null
-    var buttonReg: Button? = null
-    var mAuth: FirebaseAuth? = null
-    var progressBar: ProgressBar? = null
-    var textView: TextView? = null
 
-    public override fun onStart() {
-        super.onStart()
-        // Check if user is signed in (non-null) and update UI accordingly.
-        val currentUser = mAuth!!.getCurrentUser()
-        if (currentUser != null) {
-            val intent = Intent(getApplicationContext(), MainActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
-    }
+    private lateinit var mAuth: FirebaseAuth
+    private lateinit var progressBar: ProgressBar
+
+    private lateinit var nameField: TextInputEditText
+    private lateinit var usernameField: TextInputEditText
+    private lateinit var emailField: TextInputEditText
+    private lateinit var passwordField: TextInputEditText
+    private lateinit var confirmPasswordField: TextInputEditText
+    private lateinit var dobField: TextInputEditText
+    private lateinit var registerButton: Button
+    private lateinit var loginNow: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
+
         mAuth = FirebaseAuth.getInstance()
+        progressBar = findViewById(R.id.progressBar)
 
-        // Initialise the objects
-        editTextEmail = findViewById<TextInputEditText>(R.id.email)
-        editTextPassword = findViewById<TextInputEditText>(R.id.password)
-        buttonReg = findViewById<Button>(R.id.btn_register)
-        progressBar = findViewById<ProgressBar>(R.id.progressBar)
-        textView = findViewById<TextView>(R.id.loginNow)
-        textView!!.setOnClickListener(object : View.OnClickListener {
-            override fun onClick(v: View?) {
-                val intent = Intent(getApplicationContext(), Login::class.java)
-                startActivity(intent)
-                finish()
-            }
-        })
-        buttonReg!!.setOnClickListener(object : View.OnClickListener {
-            override fun onClick(v: View?) {
-                progressBar!!.setVisibility(View.VISIBLE)
-                val email: String?
-                val password: String?
-                email = editTextEmail!!.getText().toString().toString()
-                password = editTextPassword!!.getText().toString().toString()
+        initViews()
+        setupListeners()
+    }
 
-                if (TextUtils.isEmpty(email)) {
-                    val context: Context?
-                    val text: String?
-                    Toast.makeText(
-                        this@Register.also { context = it },
-                        "Enter email".also { text = it },
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return
-                }
-                if (TextUtils.isEmpty(password)) {
-                    val context: Context?
-                    val text: String?
-                    Toast.makeText(
-                        this@Register.also { context = it },
-                        "Enter Password".also { text = it },
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return
-                }
-                mAuth!!.createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(object : OnCompleteListener<AuthResult?> {
-                        override fun onComplete(task: Task<AuthResult?>) {
-                            progressBar!!.setVisibility(View.GONE)
-                            if (task.isSuccessful()) {
-                                val context: Context?
-                                var text: String?
+    private fun initViews() {
+        nameField = findViewById(R.id.name)
+        usernameField = findViewById(R.id.username)
+        emailField = findViewById(R.id.email)
+        passwordField = findViewById(R.id.password)
+        confirmPasswordField = findViewById(R.id.confirmPassword)
+        dobField = findViewById(R.id.dob)
+        registerButton = findViewById(R.id.btn_register)
+        loginNow = findViewById(R.id.loginNow)
+    }
+
+    private fun setupListeners() {
+        loginNow.setOnClickListener {
+            startActivity(Intent(this, Login::class.java))
+            finish()
+        }
+
+        // Show DatePicker when DOB field is tapped
+        dobField.setOnClickListener { showDatePicker() }
+
+        registerButton.setOnClickListener { registerUser() }
+    }
+
+    @SuppressLint("DefaultLocale")
+    private fun showDatePicker() {
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+        val datePicker = DatePickerDialog(
+            this,
+            android.R.style.Theme_Holo_Light_Dialog_NoActionBar, // spinner style
+            { _, selectedYear, selectedMonth, selectedDay ->
+                val formatted = String.format("%04d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay)
+                dobField.setText(formatted)
+            },
+            year,
+            month,
+            day
+        )
+
+        // Force spinner mode
+        datePicker.datePicker.calendarViewShown = false
+        datePicker.datePicker.spinnersShown = true
+
+        datePicker.show()
+    }
+
+
+    private fun registerUser() {
+        val name = nameField.text.toString().trim()
+        val username = usernameField.text.toString().trim()
+        val email = emailField.text.toString().trim()
+        val password = passwordField.text.toString().trim()
+        val confirmPassword = confirmPasswordField.text.toString().trim()
+        val dob = dobField.text.toString().trim()
+
+        if (!validateInputs(name, username, email, password, confirmPassword, dob)) return
+
+        progressBar.visibility = View.VISIBLE
+
+        mAuth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                progressBar.visibility = View.GONE
+                if (task.isSuccessful) {
+                    val uid = mAuth.currentUser?.uid
+                    if (uid != null) {
+                        FirebaseInteractions.createUserDoc(
+                            uid,
+                            name,
+                            username,
+                            email,
+                            dob
+                        ) { success ->
+                            if (success) {
+                                // Run these independently
+                                FirebaseInteractions.createStarterCategory(uid)
+                                FirebaseInteractions.createStarterExpense(uid)
+
                                 Toast.makeText(
-                                    this@Register.also { context = it }, "Account Created.",
+                                    this,
+                                    "Account created successfully",
                                     Toast.LENGTH_SHORT
                                 ).show()
+                                startActivity(Intent(this, HomeActivity::class.java))
+                                finish()
                             } else {
-                                // If sign in fails, display a message to the user.
-                                val context: Context?
-                                var text: String?
-                                Log.w(
-                                    ContentValues.TAG,
-                                    "createUserWithEmail:failure",
-                                    task.getException()
-                                )
                                 Toast.makeText(
-                                    this@Register.also { context = it }, "Authentication failed.",
+                                    this,
+                                    "Failed to create user data",
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
                         }
-                    })
+                    }
+                }
             }
-        })
+    }
+
+
+
+    private fun validateInputs(
+        name: String,
+        username: String,
+        email: String,
+        password: String,
+        confirmPassword: String,
+        dob: String
+    ): Boolean {
+        if (name.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty() || dob.isEmpty()) {
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        if (password != confirmPassword) {
+            Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        return true
     }
 }

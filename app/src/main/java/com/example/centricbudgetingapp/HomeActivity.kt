@@ -3,7 +3,6 @@ package com.example.centricbudgetingapp
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.content.Intent
-import android.util.Log
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.EditText
@@ -16,7 +15,6 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 
 class HomeActivity : AppCompatActivity() {
 
@@ -33,7 +31,6 @@ class HomeActivity : AppCompatActivity() {
         setupDrawer()
     }
 
-    //Fetches user data from Firebase using the firebase interactions file
     @SuppressLint("SetTextI18n")
     private fun fetchUserData() {
         FirebaseInteractions.getBalance { balance ->
@@ -45,10 +42,6 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-
-
-
-    //Handles the button for adding to the balance
     @SuppressLint("SetTextI18n")
     private fun setupBalanceButton() {
         val addBalanceBtn = findViewById<Button>(R.id.btnAddBalance)
@@ -76,8 +69,6 @@ class HomeActivity : AppCompatActivity() {
                 .show()
         }
     }
-
-
 
     //nav menu
     @SuppressLint("SetTextI18n")
