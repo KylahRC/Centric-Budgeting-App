@@ -15,8 +15,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.FirebaseFirestore
-
+import android.widget.EditText
+import android.text.InputType
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import android.widget.Toast
 import com.example.centricbudgetingapp.FirebaseInteractions
 import com.example.centricbudgetingapp.UserData
 
@@ -40,6 +43,32 @@ class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
+
+        val addBalanceBtn = findViewById<Button>(R.id.btnAddBalance)
+        addBalanceBtn.setOnClickListener {
+            val input = EditText(this)
+            input.inputType = InputType.TYPE_CLASS_NUMBER
+
+            AlertDialog.Builder(this)
+                .setTitle("Add to Balance")
+                .setView(input)
+                .setPositiveButton("Add") { _, _ ->
+                    val amount = input.text.toString().toLongOrNull() ?: 0L
+                    if (amount > 0) {
+                        FirebaseInteractions.addToBalance(amount) { newBalance ->
+                            if (newBalance != null) {
+                                findViewById<TextView>(R.id.tvBalance).text = "Balance: $newBalance"
+                            } else {
+                                Toast.makeText(this, "Failed to update balance", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                        }
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+
 
 
 

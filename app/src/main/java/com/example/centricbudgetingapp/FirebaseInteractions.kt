@@ -86,4 +86,31 @@ object FirebaseInteractions {
 
 
     }
+
+    fun addToBalance(amount: Long, onResult: (Long?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return onResult(null)
+        val userRef = db.collection("users").document(userId)
+
+        userRef.get().addOnSuccessListener { doc ->
+            if (doc != null && doc.exists()) {
+                val currentBalance = (doc.get("balance") as? Long) ?: 0L
+                val newBalance = currentBalance + amount
+
+                userRef.update("balance", newBalance)
+                    .addOnSuccessListener {
+                        Log.d("FirebaseInteractions", "Balance updated to $newBalance")
+                        onResult(newBalance)
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("FirebaseInteractions", "Error updating balance", e)
+                        onResult(null)
+                    }
+            } else {
+                onResult(null)
+            }
+        }.addOnFailureListener { e ->
+            Log.e("FirebaseInteractions", "Error fetching balance", e)
+            onResult(null)
+        }
+    }
 }
