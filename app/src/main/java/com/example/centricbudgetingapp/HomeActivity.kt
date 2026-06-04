@@ -49,7 +49,7 @@ class HomeActivity : AppCompatActivity() {
                     val balance = doc.get("balance")
                     val name = doc.getString("username")
 
-                    Log.d("HomeActivity", "Fetched balance=$balance, username=$name")
+                    //Log.d("HomeActivity", "Fetched balance=$balance, username=$name")
 
                     findViewById<TextView>(R.id.tvBalance).text = "Balance: $balance"
                     findViewById<TextView>(R.id.tvTest).text = "Connected as: $name"

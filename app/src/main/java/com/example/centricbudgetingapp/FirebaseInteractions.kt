@@ -29,14 +29,20 @@ object FirebaseInteractions {
 
         userDocRef.get().addOnSuccessListener { userDoc ->
             if (userDoc != null && userDoc.exists()) {
+                Log.d("FirebaseInteractionsUserName", "Username field: ${userDoc.get("username")}")
                 val userData = UserData(
                     username = userDoc.getString("username"),
                     email = userDoc.getString("email"),
                     minGoal = userDoc.getLong("minGoal"),
                     maxGoal = userDoc.getLong("maxGoal"),
                     balance = userDoc.getLong("balance")
+
                 )
-                Log.d("FirebaseInteractions", "Balance field: ${userDoc.get("balance")}")
+
+//                Log.d("FirebaseInteractionsBalance", "Balance field: ${userDoc.get("balance")}")
+//                Log.d("FirebaseInteractionsEmail", "Email field: ${userDoc.get("email")}")
+//                Log.d("FirebaseInteractionsMinGoal", "MinGoal field: ${userDoc.get("minGoal")}")
+
 
 
                 // fetch categories
@@ -71,9 +77,13 @@ object FirebaseInteractions {
             } else {
                 onResult(null)
             }
+
+
         }.addOnFailureListener { e ->
             Log.e("FirebaseInteractions", "Error fetching user data", e)
             onResult(null)
         }
+
+
     }
 }
