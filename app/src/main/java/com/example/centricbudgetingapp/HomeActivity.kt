@@ -14,14 +14,21 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.firestore
+import com.google.firebase.firestore.FirebaseFirestore
+
 import android.widget.TextView
+import com.example.centricbudgetingapp.FirebaseInteractions
+import com.example.centricbudgetingapp.UserData
 
 class HomeActivity : AppCompatActivity() {
 
     //db firebase calls and vals
     val db = Firebase.firestore
+//    val userId = FirebaseAuth.getInstance().currentUser?.uid
+//    val userRef = db.collection("users").document(userId!!)
+
     val userId = FirebaseAuth.getInstance().currentUser?.uid
-    val userRef = db.collection("users").document(userId!!)
+    val userRef = FirebaseFirestore.getInstance().collection("users").document(userId!!)
 
     //other vals
     private lateinit var drawerLayout: DrawerLayout
@@ -33,6 +40,28 @@ class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
+
+
+
+        userRef.get()
+            .addOnSuccessListener { doc ->
+                if (doc != null && doc.exists()) {
+                    val balance = doc.get("balance")
+                    val name = doc.getString("username")
+
+                    Log.d("HomeActivity", "Fetched balance=$balance, username=$name")
+
+                    findViewById<TextView>(R.id.tvBalance).text = "Balance: $balance"
+                    findViewById<TextView>(R.id.tvTest).text = "Connected as: $name"
+                } else {
+                    Log.d("HomeActivity", "No document found")
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("HomeActivity", "Error fetching user data", e)
+            }
+
+
 
         //this drawer thing is the left menu
         drawerLayout = findViewById(R.id.drawerLayout)
@@ -67,8 +96,12 @@ class HomeActivity : AppCompatActivity() {
             true
         }
 
+
+
+
+
         //I wanted to combine this into one but it gave me issues but this works and im not touching it
-        userRef.get().addOnSuccessListener { doc ->
+       /* userRef.get().addOnSuccessListener { doc ->
             if (doc != null && doc.exists()) {
                 val name = doc.getString("name")
                 findViewById<TextView>(R.id.tvTest).text = "Connected to database for: $name"
@@ -92,7 +125,7 @@ class HomeActivity : AppCompatActivity() {
             }
         }.addOnFailureListener { e ->
             findViewById<TextView>(R.id.tvTest).text = "Error: ${e.message}"
-        }
+        }*/
     }
 }
 
