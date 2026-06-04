@@ -5,7 +5,7 @@ data class UserData(
     val email: String? = null,
     val minGoal: Long? = null,
     val maxGoal: Long? = null,
-    val balance: Any? = null,
+    val balance: Long? = null,
     val categories: List<Category> = emptyList(),
     val expenses: List<Expense> = emptyList()
 )

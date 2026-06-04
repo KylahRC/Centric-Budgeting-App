@@ -16,6 +16,7 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class HomeActivity : AppCompatActivity() {
 
@@ -31,6 +32,21 @@ class HomeActivity : AppCompatActivity() {
         fetchUserData()
         setupDrawer()
     }
+
+    //Fetches user data from Firebase using the firebase interactions file
+    @SuppressLint("SetTextI18n")
+    private fun fetchUserData() {
+        FirebaseInteractions.getBalance { balance ->
+            findViewById<TextView>(R.id.tvBalance).text = "Balance: ${balance ?: 0}"
+        }
+
+        FirebaseInteractions.getUsername { username ->
+            findViewById<TextView>(R.id.tvTest).text = "Connected as: ${username ?: "Unknown"}"
+        }
+    }
+
+
+
 
     //Handles the button for adding to the balance
     @SuppressLint("SetTextI18n")
@@ -61,18 +77,7 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    //Fetches user data from Firebase using the firebase interactions file
-    @SuppressLint("SetTextI18n")
-    private fun fetchUserData() {
-        FirebaseInteractions.fetchAllUserData { userData ->
-            if (userData != null) {
-                findViewById<TextView>(R.id.tvBalance).text = "Balance: ${userData.balance}"
-                findViewById<TextView>(R.id.tvTest).text = "Connected as: ${userData.username}"
-            } else {
-                Log.d("HomeActivity", "No user data found")
-            }
-        }
-    }
+
 
     //nav menu
     @SuppressLint("SetTextI18n")

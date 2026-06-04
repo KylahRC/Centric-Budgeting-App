@@ -23,69 +23,89 @@ object FirebaseInteractions {
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-    fun fetchAllUserData(onResult: (UserData?) -> Unit) {
-        val userId = auth.currentUser?.uid ?: return onResult(null)
-        val userDocRef = db.collection("users").document(userId)
+        fun getBalance(onResult: (Long?) -> Unit) {
+            val userId = auth.currentUser?.uid ?: return onResult(null)
+            db.collection("users").document(userId).get()
+                .addOnSuccessListener { doc ->
+                    onResult(doc.getLong("balance"))
+                }
+                .addOnFailureListener { onResult(null) }
+        }
 
-        userDocRef.get().addOnSuccessListener { userDoc ->
-            if (userDoc != null && userDoc.exists()) {
-                Log.d("FirebaseInteractionsUserName", "Username field: ${userDoc.get("username")}")
-                val userData = UserData(
-                    username = userDoc.getString("username"),
-                    email = userDoc.getString("email"),
-                    minGoal = userDoc.getLong("minGoal"),
-                    maxGoal = userDoc.getLong("maxGoal"),
-                    balance = userDoc.getLong("balance")
+        fun getUsername(onResult: (String?) -> Unit) {
+            val userId = auth.currentUser?.uid ?: return onResult(null)
+            db.collection("users").document(userId).get()
+                .addOnSuccessListener { doc ->
+                    onResult(doc.getString("username"))
+                }
+                .addOnFailureListener { onResult(null) }
+        }
 
-                )
+        fun getEmail(onResult: (String?) -> Unit) {
+            val userId = auth.currentUser?.uid ?: return onResult(null)
+            db.collection("users").document(userId).get()
+                .addOnSuccessListener { doc ->
+                    onResult(doc.getString("email"))
+                }
+                .addOnFailureListener { onResult(null) }
+        }
 
-//                Log.d("FirebaseInteractionsBalance", "Balance field: ${userDoc.get("balance")}")
-//                Log.d("FirebaseInteractionsEmail", "Email field: ${userDoc.get("email")}")
-//                Log.d("FirebaseInteractionsMinGoal", "MinGoal field: ${userDoc.get("minGoal")}")
+        fun getMinGoal(onResult: (Long?) -> Unit) {
+            val userId = auth.currentUser?.uid ?: return onResult(null)
+            db.collection("users").document(userId).get()
+                .addOnSuccessListener { doc ->
+                    onResult(doc.getLong("minGoal"))
+                }
+                .addOnFailureListener { onResult(null) }
+        }
 
+        fun getMaxGoal(onResult: (Long?) -> Unit) {
+            val userId = auth.currentUser?.uid ?: return onResult(null)
+            db.collection("users").document(userId).get()
+                .addOnSuccessListener { doc ->
+                    onResult(doc.getLong("maxGoal"))
+                }
+                .addOnFailureListener { onResult(null) }
+        }
 
-
-                // fetch categories
-                userDocRef.collection("categories").get().addOnSuccessListener { catSnap ->
-                    val categories = catSnap.documents.map { doc ->
+        fun getCategories(onResult: (List<Category>) -> Unit) {
+            val userId = auth.currentUser?.uid ?: return onResult(emptyList())
+            db.collection("users").document(userId).collection("categories").get()
+                .addOnSuccessListener { snap ->
+                    val categories = snap.documents.map { doc ->
                         Category(
                             id = doc.id,
                             name = doc.getString("name"),
                             description = doc.getString("description")
                         )
                     }
-
-                    // fetch expenses
-                    userDocRef.collection("expenses").get().addOnSuccessListener { expSnap ->
-                        val expenses = expSnap.documents.map { doc ->
-                            Expense(
-                                id = doc.id,
-                                amount = doc.getDouble("amount"),
-                                description = doc.getString("description"),
-                                categoryId = doc.getString("categoryId"),
-                                photoUrl = doc.getString("photoUrl"),
-                                date = doc.getLong("date"),
-                                startTime = doc.getLong("startTime"),
-                                endTime = doc.getLong("endTime")
-                            )
-                        }
-
-                        // return combined data
-                        onResult(userData.copy(categories = categories, expenses = expenses))
-                    }
+                    onResult(categories)
                 }
-            } else {
-                onResult(null)
-            }
+                .addOnFailureListener { onResult(emptyList()) }
+        }
 
-
-        }.addOnFailureListener { e ->
-            Log.e("FirebaseInteractions", "Error fetching user data", e)
-            onResult(null)
+        fun getExpenses(onResult: (List<Expense>) -> Unit) {
+            val userId = auth.currentUser?.uid ?: return onResult(emptyList())
+            db.collection("users").document(userId).collection("expenses").get()
+                .addOnSuccessListener { snap ->
+                    val expenses = snap.documents.map { doc ->
+                        Expense(
+                            id = doc.id,
+                            amount = doc.getDouble("amount"),
+                            description = doc.getString("description"),
+                            categoryId = doc.getString("categoryId"),
+                            photoUrl = doc.getString("photoUrl"),
+                            date = doc.getLong("date"),
+                            startTime = doc.getLong("startTime"),
+                            endTime = doc.getLong("endTime")
+                        )
+                    }
+                    onResult(expenses)
+                }
+                .addOnFailureListener { onResult(emptyList()) }
         }
 
 
-    }
 
     fun addToBalance(amount: Long, onResult: (Long?) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onResult(null)
