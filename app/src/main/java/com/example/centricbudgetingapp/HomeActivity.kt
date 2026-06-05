@@ -3,10 +3,12 @@ package com.example.centricbudgetingapp
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.content.Intent
+import android.icu.util.Calendar
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.EditText
 import android.text.InputType
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -15,72 +17,52 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
+import android.graphics.Typeface
 
 class HomeActivity : AppCompatActivity() {
 
+    // UI
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navigationView: NavigationView
     private lateinit var menuButton: ImageButton
+    private lateinit var balanceAmount: TextView
+    private lateinit var moneyRemainingAmount: TextView
+    private lateinit var recentExpensesLayout: LinearLayout
+    private lateinit var addExpenseButton: Button
+
+    // Data
+    private var currentYear = Calendar.getInstance().get(Calendar.YEAR)
+    private var currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
 
-        setupBalanceButton()
-        fetchUserData()
-        setupDrawer()
-    }
-
-    @SuppressLint("SetTextI18n")
-    private fun fetchUserData() {
-        FirebaseInteractions.getBalance { balance ->
-            findViewById<TextView>(R.id.tvBalance).text = "Balance: ${balance ?: 0}"
-        }
-
-        FirebaseInteractions.getUsername { username ->
-            findViewById<TextView>(R.id.tvTest).text = "Connected as: ${username ?: "Unknown"}"
-        }
-    }
-
-    @SuppressLint("SetTextI18n")
-    private fun setupBalanceButton() {
-        val addBalanceBtn = findViewById<Button>(R.id.btnAddBalance)
-        addBalanceBtn.setOnClickListener {
-            val input = EditText(this).apply {
-                inputType = InputType.TYPE_CLASS_NUMBER
-            }
-
-            AlertDialog.Builder(this)
-                .setTitle("Add to Balance")
-                .setView(input)
-                .setPositiveButton("Add") { _, _ ->
-                    val amount = input.text.toString().toLongOrNull() ?: 0L
-                    if (amount > 0) {
-                        FirebaseInteractions.addToBalance(amount) { newBalance ->
-                            if (newBalance != null) {
-                                findViewById<TextView>(R.id.tvBalance).text = "Balance: $newBalance"
-                            } else {
-                                Toast.makeText(this, "Failed to update balance", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    }
-                }
-                .setNegativeButton("Cancel", null)
-                .show()
-        }
-    }
-
-    //nav menu
-    @SuppressLint("SetTextI18n")
-    private fun setupDrawer() {
+        // --- Setup UI ---
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
         menuButton = findViewById(R.id.btnMenu)
+        balanceAmount = findViewById(R.id.tvBalanceAmount)
+        moneyRemainingAmount = findViewById(R.id.tvMoneyRemainingAmount)
+        recentExpensesLayout = findViewById(R.id.layoutRecentExpenses)
+        addExpenseButton = findViewById(R.id.btnAddExpense)
 
-        menuButton.setOnClickListener {
-            drawerLayout.openDrawer(GravityCompat.START)
+        // --- Drawer Menu ---
+        setupDrawer()
+
+        // --- Load Data ---
+        loadBalance()
+        loadMoneyRemaining(currentYear, currentMonth)
+        loadRecentExpenses(currentYear, currentMonth)
+
+        // --- Add Expense Button ---
+        addExpenseButton.setOnClickListener {
+            startActivity(Intent(this, AddExpenseActivity::class.java))
         }
+    }
 
+    private fun setupDrawer() {
+        menuButton.setOnClickListener { drawerLayout.openDrawer(GravityCompat.START) }
         navigationView.setNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> startActivity(Intent(this, HomeActivity::class.java))
@@ -101,4 +83,53 @@ class HomeActivity : AppCompatActivity() {
             true
         }
     }
+
+    private fun loadBalance() {
+        FirebaseInteractions.getBalance { balance ->
+            balanceAmount.text = "R${balance ?: 0}"
+        }
+    }
+
+    private fun loadMoneyRemaining(year: Int, month: Int) {
+        FirebaseInteractions.getBalance { balance ->
+            FirebaseInteractions.getCategoryTotalsForMonth(year, month) { totals ->
+                val totalExpenses = totals.values.sum()
+                val remaining = (balance ?: 0) - totalExpenses
+                moneyRemainingAmount.text = "R$remaining"
+            }
+        }
+    }
+
+    private fun loadRecentExpenses(year: Int, month: Int) {
+        FirebaseInteractions.getExpenses { expenses ->
+            val filtered = expenses.filter { exp ->
+                exp.date?.let {
+                    val parts = it.split("-")
+                    val expYear = parts.getOrNull(0)?.toIntOrNull()
+                    val expMonth = parts.getOrNull(1)?.toIntOrNull()
+                    expYear == year && expMonth == month
+                } ?: false
+            }.sortedByDescending { it.date }.take(5) // latest 5
+
+            recentExpensesLayout.removeAllViews()
+
+            for (exp in filtered) {
+                val expLayout = LinearLayout(this)
+                expLayout.orientation = LinearLayout.VERTICAL
+                expLayout.setPadding(0, 8, 0, 8)
+
+                val descText = TextView(this)
+                descText.text = "${exp.date ?: ""} – ${exp.description ?: "No description"}"
+                descText.setTypeface(null, Typeface.BOLD)
+                expLayout.addView(descText)
+
+                val amountText = TextView(this)
+                amountText.text = "Amount: R${exp.amount ?: 0.0}"
+                expLayout.addView(amountText)
+
+                recentExpensesLayout.addView(expLayout)
+            }
+        }
+    }
 }
+

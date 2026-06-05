@@ -1,74 +1,124 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:theme="@style/AppTheme">
 
-<!--    takes the header like stylesheets in css-->
+    <!-- Header -->
     <include
         layout="@layout/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-<!--    for the menu that pops up on the left-->
+    <!-- Drawer -->
     <androidx.drawerlayout.widget.DrawerLayout
         android:id="@+id/drawerLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <!-- Main content -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/white">
 
+            <!-- Balance Heading -->
+
+            <!-- Balance Amount -->
+
+            <!-- Money Remaining Heading -->
             <TextView
-                android:id="@+id/tvBalance"
+                android:id="@+id/tvBalanceHeading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Balance: [BALANCE_NOT_FOUND]"
+                android:text="Total Balance"
+                android:textSize="34sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                android:layout_marginTop="24dp"/>
+
+            <TextView
+                android:id="@+id/tvBalanceAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="R0.00"
+                android:textSize="28sp"
+                app:layout_constraintTop_toBottomOf="@id/tvBalanceHeading"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                android:layout_marginTop="8dp"/>
+
+            <!-- Recent Expenses Heading -->
+            <TextView
+                android:id="@+id/tvMoneyRemainingHeading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Money Remaining"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:layout_marginTop="24dp"
-                android:layout_marginStart="16dp"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"/>
+                app:layout_constraintTop_toBottomOf="@id/tvBalanceAmount"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                android:layout_marginTop="24dp"/>
 
             <TextView
-                android:id="@+id/tvRemaining"
+                android:id="@+id/tvMoneyRemainingAmount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Remaining: R1,700.00"
-                android:textSize="16sp"
-                android:layout_marginTop="12dp"
-                android:layout_marginStart="16dp"
-                app:layout_constraintTop_toBottomOf="@id/tvBalance"
-                app:layout_constraintStart_toStartOf="parent"/>
+                android:text="R0.00"
+                android:textSize="18sp"
+                app:layout_constraintTop_toBottomOf="@id/tvMoneyRemainingHeading"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                android:layout_marginTop="8dp"/>
 
             <TextView
-                android:id="@+id/tvTest"
+                android:id="@+id/tvRecentExpensesHeading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="DATABASE_NOT_CONNECTED"
-                android:textSize="16sp"
-                android:layout_marginTop="12dp"
-                android:layout_marginStart="16dp"
-                app:layout_constraintTop_toBottomOf="@id/tvRemaining"
-                app:layout_constraintStart_toStartOf="parent"/>
+                android:text="Recent Expenses"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toBottomOf="@id/tvMoneyRemainingAmount"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="32dp"
+                android:layout_marginStart="16dp"/>
 
+            <!-- Recent Expenses List -->
+            <LinearLayout
+                android:id="@+id/layoutRecentExpenses"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintTop_toBottomOf="@id/tvRecentExpensesHeading"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"/>
+
+            <!-- Add Expense Button -->
             <Button
-                android:id="@+id/btnAddBalance"
+                android:id="@+id/btnAddExpense"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="+"
-                android:layout_marginTop="12dp"
-                app:layout_constraintTop_toBottomOf="@id/tvTest"
-                app:layout_constraintStart_toStartOf="parent"/>
-
+                android:text="Add Expense"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginBottom="32dp"
+                android:layout_marginEnd="32dp"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-<!--        more of the side menu-->
+        <!-- Side Menu -->
         <com.google.android.material.navigation.NavigationView
             android:id="@+id/navigationView"
             android:layout_width="wrap_content"

@@ -22,40 +22,62 @@
             android:layout_height="match_parent"
             android:background="@color/white">
 
-        <TextView
-            android:id="@+id/tvCategoryTotalsHeading"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Category Totals"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginTop="24dp"
-            android:layout_marginStart="16dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
+            <!-- Month Heading -->
+            <TextView
+                android:id="@+id/tvMonthHeading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="July 2026"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:layout_marginTop="24dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"/>
 
-        <TextView
-            android:id="@+id/tvGroceriesTotal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Groceries: R1000"
-            android:layout_marginTop="24dp"
-            android:layout_marginStart="16dp"
-            app:layout_constraintTop_toBottomOf="@id/tvCategoryTotalsHeading"
-            app:layout_constraintStart_toStartOf="parent"  />
+            <!-- Left Arrow -->
+            <ImageButton
+                android:id="@+id/btnPrevMonth"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@android:drawable/ic_media_previous"
+                android:background="@android:color/transparent"
+                app:layout_constraintTop_toTopOf="@id/tvMonthHeading"
+                app:layout_constraintBottom_toBottomOf="@id/tvMonthHeading"
+                app:layout_constraintStart_toStartOf="parent"/>
 
-        <TextView
-            android:id="@+id/tvTransportTotal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Transport: R300"
-            android:layout_marginTop="24dp"
-            android:layout_marginStart="16dp"
-            android:textColor="@color/black"
-            app:layout_constraintTop_toBottomOf="@id/tvGroceriesTotal"
-            app:layout_constraintStart_toStartOf="parent"  />
+            <!-- Right Arrow -->
+            <ImageButton
+                android:id="@+id/btnNextMonth"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@android:drawable/ic_media_next"
+                android:background="@android:color/transparent"
+                app:layout_constraintTop_toTopOf="@id/tvMonthHeading"
+                app:layout_constraintBottom_toBottomOf="@id/tvMonthHeading"
+                app:layout_constraintEnd_toEndOf="parent"/>
 
+            <!-- Scrollable Totals -->
+            <ScrollView
+                android:id="@+id/scrollTotals"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintTop_toBottomOf="@id/tvMonthHeading"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <LinearLayout
+                    android:id="@+id/layoutTotals"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"/>
+            </ScrollView>
         </androidx.constraintlayout.widget.ConstraintLayout>
+
 
         <com.google.android.material.navigation.NavigationView
             android:id="@+id/navigationView"

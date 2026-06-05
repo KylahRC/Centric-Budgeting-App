@@ -213,4 +213,63 @@ object FirebaseInteractions {
                 onResult(false)
             }
     }
+
+    fun getCategoryTotalsForMonth(year: Int, month: Int, onResult: (Map<String, Double>) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return onResult(emptyMap())
+        val userRef = db.collection("users").document(userId)
+
+        userRef.collection("expenses").get()
+            .addOnSuccessListener { snap ->
+                val totals = mutableMapOf<String, Double>()
+
+                for (doc in snap.documents) {
+                    val dateStr = doc.getString("date") ?: continue
+                    // Expect format YYYY-MM-DD
+                    val parts = dateStr.split("-")
+                    if (parts.size == 3) {
+                        val expYear = parts[0].toIntOrNull()
+                        val expMonth = parts[1].toIntOrNull()
+                        if (expYear == year && expMonth == month) {
+                            val categoryId = doc.getString("categoryId") ?: "Unknown"
+                            val amount = doc.getDouble("amount") ?: 0.0
+                            totals[categoryId] = (totals[categoryId] ?: 0.0) + amount
+                        }
+                    }
+                }
+                onResult(totals)
+            }
+            .addOnFailureListener { onResult(emptyMap()) }
+    }
+
+    fun setBudgetGoals(minGoalAmount: Long, maxGoalAmount: Long, onResult: (Boolean) -> Unit = {}) {
+        val userId = auth.currentUser?.uid ?: return onResult(false)
+        val userRef = db.collection("users").document(userId)
+
+        val updates = mapOf(
+            "minGoal" to minGoalAmount,
+            "maxGoal" to maxGoalAmount
+        )
+
+        userRef.update(updates)
+            .addOnSuccessListener { onResult(true) }
+            .addOnFailureListener { e ->
+                Log.e("FirebaseInteractions", "Error saving budget goals", e)
+                onResult(false)
+            }
+    }
+
+    fun getBudgetGoals(onResult: (Long?, Long?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return onResult(null, null)
+        val userRef = db.collection("users").document(userId)
+
+        userRef.get()
+            .addOnSuccessListener { doc ->
+                val minGoal = doc.getLong("minGoal")
+                val maxGoal = doc.getLong("maxGoal")
+                onResult(minGoal, maxGoal)
+            }
+            .addOnFailureListener { onResult(null, null) }
+    }
+
+
 }

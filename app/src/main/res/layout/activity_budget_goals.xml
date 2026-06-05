@@ -2,9 +2,11 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@style/AppTheme">
+    android:theme="@style/AppTheme"
+    >
 
     <include
         layout="@layout/header"
@@ -22,53 +24,73 @@
             android:layout_height="match_parent"
             android:background="@color/white">
 
-        <TextView
-            android:id="@+id/tvBudgetGoalsHeading"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Budget Goals"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginTop="24dp"
-            android:layout_marginStart="16dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
+            <!-- Balance -->
 
-        <EditText
-            android:id="@+id/etMinGoal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Minimum Goal"
-            android:textColorHint="#AAAAAA"
-            android:padding="12dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginStart="16dp"
-            android:textColor="@color/black"
-            app:layout_constraintTop_toBottomOf="@id/tvBudgetGoalsHeading"
-            app:layout_constraintStart_toStartOf="parent" />
+            <!-- Add Money Button -->
+            <TextView
+                android:id="@+id/tvBalance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Balance: R0.00"
+                android:textSize="20sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <EditText
-            android:id="@+id/etMaxGoal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Maximum Goal"
-            android:textColorHint="#AAAAAA"
-            android:padding="12dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginStart="16dp"
-            android:textColor="@color/black"
-            app:layout_constraintTop_toBottomOf="@id/etMinGoal"
-            app:layout_constraintStart_toStartOf="parent"/>
+            <!-- Min Goal Slider -->
 
-        <Button
-            android:id="@+id/btnSaveGoals"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Save Goals"
-            android:layout_marginTop="24dp"
-            android:layout_marginStart="16dp"
-            app:layout_constraintTop_toBottomOf="@id/etMaxGoal"
-            app:layout_constraintStart_toStartOf="parent"/>
+            <Button
+                android:id="@+id/btnAddMoney"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="144dp"
+                android:text="Add Money"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:layout_editor_absoluteY="5dp" />
+
+            <SeekBar
+                android:id="@+id/seekMinGoal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="100"
+                app:layout_constraintTop_toBottomOf="@id/btnAddMoney"
+                android:layout_marginTop="24dp"/>
+
+            <TextView
+                android:id="@+id/tvMinGoal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Min Goal: 0% (R0)"
+                app:layout_constraintTop_toBottomOf="@id/seekMinGoal"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="8dp"/>
+
+            <!-- Max Goal Slider -->
+            <SeekBar
+                android:id="@+id/seekMaxGoal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="100"
+                app:layout_constraintTop_toBottomOf="@id/tvMinGoal"
+                android:layout_marginTop="24dp"/>
+
+            <TextView
+                android:id="@+id/tvMaxGoal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Max Goal: 100% (R0)"
+                app:layout_constraintTop_toBottomOf="@id/seekMaxGoal"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="8dp"/>
+
+            <Button
+                android:id="@+id/btnSaveGoals"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Save Goals"
+                app:layout_constraintTop_toBottomOf="@id/tvMaxGoal"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="24dp"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
