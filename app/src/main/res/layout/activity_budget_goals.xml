@@ -38,8 +38,35 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <!-- Min Goal Slider -->
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etIncome"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter Monthly Income"
+                android:inputType="numberDecimal"
+                app:layout_constraintTop_toBottomOf="@id/tvBalance"
+                android:layout_marginTop="16dp" />
 
             <Button
+                android:id="@+id/btnCalculate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Calculate Split"
+                app:layout_constraintTop_toBottomOf="@id/etIncome"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="16dp"/>
+
+            <TextView
+                android:id="@+id/tvResult"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Needs: R0.00 | Wants: R0.00"
+                android:textSize="16sp"
+                app:layout_constraintTop_toBottomOf="@id/btnCalculate"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="16dp"/>
+
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnAddMoney"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

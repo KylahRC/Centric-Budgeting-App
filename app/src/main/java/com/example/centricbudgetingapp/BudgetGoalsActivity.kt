@@ -15,6 +15,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 
 class BudgetGoalsActivity : AppCompatActivity() {
@@ -37,7 +38,6 @@ class BudgetGoalsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_budget_goals)
 
-        setContentView(R.layout.activity_budget_goals)
 
         initUI()
         setupDrawer()
@@ -46,6 +46,21 @@ class BudgetGoalsActivity : AppCompatActivity() {
         setupAddMoney()
         setupSliders()
         setupSaveGoals()
+
+        val etIncome = findViewById<TextInputEditText>(R.id.etIncome)
+        val btnCalculate = findViewById<Button>(R.id.btnCalculate)
+        val tvResult = findViewById<TextView>(R.id.tvResult)
+
+        btnCalculate.setOnClickListener {
+            // Grab user input safely
+            val total = etIncome.text.toString().toDoubleOrNull() ?: 0.0
+
+            // Call our new calculator
+            val (needs, wants) = BudgetCalculator.calculateSplit(total, 0.6)
+
+            // Display results
+            tvResult.text = "Needs: R${"%.2f".format(needs)}\nWants: R${"%.2f".format(wants)}"
+        }
     }
 
     private fun initUI() {
