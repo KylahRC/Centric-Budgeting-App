@@ -52,14 +52,13 @@ class BudgetGoalsActivity : AppCompatActivity() {
         val tvResult = findViewById<TextView>(R.id.tvResult)
 
         btnCalculate.setOnClickListener {
-            // Grab user input safely
-            val total = etIncome.text.toString().toDoubleOrNull() ?: 0.0
+            val inputString = etIncome.text.toString()
+            val total = inputString.toDoubleOrNull() ?: 0.0
 
-            // Call our new calculator
             val (needs, wants) = BudgetCalculator.calculateSplit(total, 0.6)
 
-            // Display results
-            tvResult.text = "Needs: R${"%.2f".format(needs)}\nWants: R${"%.2f".format(wants)}"
+            // Using basic concatenation to avoid formatting errors entirely
+            tvResult.text = "Needs: R" + String.format("%.2f", needs) + "\nWants: R" + String.format("%.2f", wants)
         }
     }
 
