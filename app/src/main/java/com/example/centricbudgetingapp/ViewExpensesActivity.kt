@@ -27,8 +27,7 @@ class ViewExpensesActivity : AppCompatActivity() {
         loadExpenses()
     }
 
-    private fun setupDrawer()
-    {
+    private fun setupDrawer() {
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
         menuButton = findViewById(R.id.btnMenu)
@@ -42,6 +41,7 @@ class ViewExpensesActivity : AppCompatActivity() {
                 R.id.nav_budget_goals -> startActivity(Intent(this, BudgetGoalsActivity::class.java))
                 R.id.nav_view_expenses -> startActivity(Intent(this, ViewExpensesActivity::class.java))
                 R.id.nav_category_totals -> startActivity(Intent(this, CategoryTotalsActivity::class.java))
+                R.id.nav_split_expense -> startActivity(Intent(this, SplitExpenseActivity::class.java))
                 R.id.nav_logout -> {
                     FirebaseAuth.getInstance().signOut()
                     val intent = Intent(this, Login::class.java)
@@ -54,26 +54,34 @@ class ViewExpensesActivity : AppCompatActivity() {
             true
         }
     }
+
     @SuppressLint("SetTextI18n")
     private fun loadExpenses() {
-        // First load categories into a map
         FirebaseInteractions.getCategories { categories ->
             val categoryMap = categories.associate { it.id to (it.name ?: "Unnamed") }
 
-            // Then load expenses
             FirebaseInteractions.getExpenses { expenses ->
                 if (expenses.isEmpty()) {
                     expenseListText.text = "No expenses found."
                 } else {
                     val builder = StringBuilder()
+                    builder.append("Tap the text below to split the last expense:\n\n")
                     for (exp in expenses) {
                         val categoryName = categoryMap[exp.categoryId] ?: "Unknown"
                         builder.append("• ${exp.description ?: "No description"}\n")
-                        builder.append("  Amount: ${exp.amount ?: 0.0}\n")
-                        builder.append("  Category: $categoryName\n")
-                        builder.append("  Date: ${exp.date ?: "Unknown"}\n\n")
+                        builder.append("  Amount: R${exp.amount ?: 0.0}\n\n")
                     }
                     expenseListText.text = builder.toString()
+
+                    expenseListText.setOnClickListener {
+                        if (expenses.isNotEmpty()) {
+                            val lastExpense = expenses.last()
+                            val intent = Intent(this, SplitExpenseActivity::class.java)
+                            intent.putExtra("EXTRA_TOTAL", lastExpense.amount ?: 0.0)
+                            intent.putExtra("EXTRA_ID", lastExpense.id)
+                            startActivity(intent)
+                        }
+                    }
                 }
             }
         }

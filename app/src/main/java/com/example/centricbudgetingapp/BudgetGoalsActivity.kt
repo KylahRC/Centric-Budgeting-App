@@ -1,6 +1,5 @@
 package com.example.centricbudgetingapp
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
@@ -15,7 +14,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
-import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 
 class BudgetGoalsActivity : AppCompatActivity() {
@@ -38,7 +36,6 @@ class BudgetGoalsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_budget_goals)
 
-
         initUI()
         setupDrawer()
         loadBalance()
@@ -46,20 +43,6 @@ class BudgetGoalsActivity : AppCompatActivity() {
         setupAddMoney()
         setupSliders()
         setupSaveGoals()
-
-        val etIncome = findViewById<TextInputEditText>(R.id.etIncome)
-        val btnCalculate = findViewById<Button>(R.id.btnCalculate)
-        val tvResult = findViewById<TextView>(R.id.tvResult)
-
-        btnCalculate.setOnClickListener {
-            val inputString = etIncome.text.toString()
-            val total = inputString.toDoubleOrNull() ?: 0.0
-
-            val (needs, wants) = BudgetCalculator.calculateSplit(total, 0.6)
-
-            // Using basic concatenation to avoid formatting errors entirely
-            tvResult.text = "Needs: R" + String.format("%.2f", needs) + "\nWants: R" + String.format("%.2f", wants)
-        }
     }
 
     private fun initUI() {
@@ -112,23 +95,26 @@ class BudgetGoalsActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupSliders() {
-        seekMinGoal.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                updateGoalTexts(progress, seekMaxGoal.progress)
-            }
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-        })
 
-        seekMaxGoal.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+    private fun setupSliders() {
+        val listener = object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                updateGoalTexts(seekMinGoal.progress, progress)
+                // Ensure Min doesn't exceed Max, and Max doesn't go below Min
+                if (seekBar == seekMinGoal && progress > seekMaxGoal.progress) {
+                    seekMaxGoal.progress = progress
+                } else if (seekBar == seekMaxGoal && progress < seekMinGoal.progress) {
+                    seekMinGoal.progress = progress
+                }
+                updateGoalTexts(seekMinGoal.progress, seekMaxGoal.progress)
             }
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-        })
+        }
+
+        seekMinGoal.setOnSeekBarChangeListener(listener)
+        seekMaxGoal.setOnSeekBarChangeListener(listener)
     }
+
 
     private fun setupSaveGoals() {
         saveGoalsButton.setOnClickListener {
@@ -152,7 +138,6 @@ class BudgetGoalsActivity : AppCompatActivity() {
         maxGoalText.text = "Max Goal: $maxPercent% (R$maxAmount)"
     }
 
-
     private fun setupDrawer() {
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
@@ -167,6 +152,7 @@ class BudgetGoalsActivity : AppCompatActivity() {
                 R.id.nav_budget_goals -> startActivity(Intent(this, BudgetGoalsActivity::class.java))
                 R.id.nav_view_expenses -> startActivity(Intent(this, ViewExpensesActivity::class.java))
                 R.id.nav_category_totals -> startActivity(Intent(this, CategoryTotalsActivity::class.java))
+                R.id.nav_split_expense -> startActivity(Intent(this, SplitExpenseActivity::class.java))
                 R.id.nav_logout -> {
                     FirebaseAuth.getInstance().signOut()
                     val intent = Intent(this, Login::class.java)

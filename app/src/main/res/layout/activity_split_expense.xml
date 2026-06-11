@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/tvTotalAmount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Total Expense: R0.00"
+        android:textSize="18sp"
+        android:layout_marginBottom="16dp"/>
+
+    <EditText
+        android:id="@+id/etMyShare"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter your share (e.g. 250)"
+        android:inputType="numberDecimal" />
+
+    <Button
+        android:id="@+id/btnConfirmSplit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Confirm Split"
+        android:layout_marginTop="24dp"/>
+</LinearLayout>

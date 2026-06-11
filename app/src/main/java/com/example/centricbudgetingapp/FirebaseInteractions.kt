@@ -269,7 +269,21 @@ object FirebaseInteractions {
                 onResult(minGoal, maxGoal)
             }
             .addOnFailureListener { onResult(null, null) }
+        }
+        // In your FirebaseInteractions.kt file, inside the object:
+        fun updateExpenseAmount(expenseId: String, newAmount: Double, callback: (Boolean) -> Unit) {
+            val userId = auth.currentUser?.uid ?: return callback(false)
+
+            // Correct Path: users/{userId}/expenses/{expenseId}
+            db.collection("users").document(userId).collection("expenses").document(expenseId)
+                .update("amount", newAmount)
+                .addOnSuccessListener { callback(true) }
+                .addOnFailureListener { e ->
+                    Log.e("FirebaseInteractions", "Error updating expense", e)
+                    callback(false)
+                }
+        }
+
+
     }
 
-
-}
