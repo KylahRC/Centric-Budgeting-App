@@ -27,25 +27,35 @@ class AddExpenseActivity : AppCompatActivity() {
 
     // Data
     private var categoryIds: List<String> = emptyList()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_expense)
 
+        // 1. Initialize UI components first
+        initializeUI()
+
+        // 2. Setup features
         setupDrawer()
         getCategories()
 
-        // --- Date Picker ---
+        // 3. Set your listeners
         dateField.setOnClickListener { showDatePicker(dateField) }
-
-        // --- Save Expense ---
         saveButton.setOnClickListener { saveExpense() }
     }
 
-    private fun setupDrawer() {
+
+    private fun initializeUI() {
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
         menuButton = findViewById(R.id.btnMenu)
+        categorySpinner = findViewById(R.id.spCategory)
+        amountField = findViewById(R.id.etAmount)
+        descriptionField = findViewById(R.id.etDescription)
+        dateField = findViewById(R.id.etDate)
+        saveButton = findViewById(R.id.btnSaveExpense)
+    }
+
+    private fun setupDrawer() {
 
         menuButton.setOnClickListener { drawerLayout.openDrawer(GravityCompat.START) }
         navigationView.setNavigationItemSelectedListener { item ->
