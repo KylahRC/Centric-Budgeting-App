@@ -70,17 +70,21 @@ class AddExpenseActivity : AppCompatActivity() {
     }
 
     private fun getCategories() {
-        // Initialize UI components first
         categorySpinner = findViewById(R.id.spCategory)
-        amountField = findViewById(R.id.etAmount)
-        descriptionField = findViewById(R.id.etDescription)
-        dateField = findViewById(R.id.etDate)
-        saveButton = findViewById(R.id.btnSaveExpense)
 
-        // Use the new combined logic
-        FirebaseInteractions.getCombinedCategories { allCategoryNames ->
-            // Update the adapter with the merged list
-            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, allCategoryNames)
+        FirebaseInteractions.getCategories { customCategories ->
+            // Standard categories don't have DB IDs, so we use their names as IDs
+            val standardNames = listOf("Food", "Transport", "Rent", "Entertainment", "Utilities")
+            val customNames = customCategories.map { it.name ?: "Unnamed" }
+
+            // Combine names for the spinner
+            val allNames = (standardNames + customNames).distinct()
+
+            // Map names to their corresponding IDs
+            // For standard ones, ID is the name. For custom ones, use the real ID.
+            categoryIds = standardNames + customCategories.map { it.id ?: "" }
+
+            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, allNames)
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             categorySpinner.adapter = adapter
         }
@@ -111,13 +115,14 @@ class AddExpenseActivity : AppCompatActivity() {
     }
 
     private fun saveExpense() {
+        android.util.Log.d("DEBUG_SAVE", "Save button clicked - entering saveExpense function")
         val amount = amountField.text.toString().toDoubleOrNull()
         val description = descriptionField.text.toString().trim()
         val selectedIndex = categorySpinner.selectedItemPosition
         val categoryId = categoryIds.getOrNull(selectedIndex) ?: ""
         val dateText = dateField.text.toString().trim()
 
-        if (amount != null && description.isNotEmpty() && categoryId.isNotEmpty() && dateText.isNotEmpty()) {
+        if (amount != null && description.isNotEmpty() && dateText.isNotEmpty()) {
             FirebaseInteractions.addExpense(
                 amount = amount,
                 description = description,

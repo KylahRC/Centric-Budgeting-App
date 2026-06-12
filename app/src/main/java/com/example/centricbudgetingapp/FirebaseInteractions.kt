@@ -125,7 +125,17 @@ object FirebaseInteractions {
                 onResult(false)
             }
     }
-
+    fun getCategoryMap(onResult: (Map<String, String>) -> Unit) {
+        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+        db.collection("categories").get().addOnSuccessListener { snapshot ->
+            val categoryMap = mutableMapOf<String, String>()
+            for (doc in snapshot) {
+                val name = doc.getString("name") ?: "Unknown"
+                categoryMap[doc.id] = name // Map DocumentID -> Name
+            }
+            onResult(categoryMap)
+        }
+    }
     fun addToBalance(amount: Long, onResult: (Long?) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onResult(null)
         val userRef = db.collection("users").document(userId)
@@ -215,30 +225,19 @@ object FirebaseInteractions {
     }
 
     fun getCategoryTotalsForMonth(year: Int, month: Int, onResult: (Map<String, Double>) -> Unit) {
-        val userId = auth.currentUser?.uid ?: return onResult(emptyMap())
-        val userRef = db.collection("users").document(userId)
-
-        userRef.collection("expenses").get()
-            .addOnSuccessListener { snap ->
-                val totals = mutableMapOf<String, Double>()
-
-                for (doc in snap.documents) {
-                    val dateStr = doc.getString("date") ?: continue
-                    // Expect format YYYY-MM-DD
-                    val parts = dateStr.split("-")
-                    if (parts.size == 3) {
-                        val expYear = parts[0].toIntOrNull()
-                        val expMonth = parts[1].toIntOrNull()
-                        if (expYear == year && expMonth == month) {
-                            val categoryId = doc.getString("categoryId") ?: "Unknown"
-                            val amount = doc.getDouble("amount") ?: 0.0
-                            totals[categoryId] = (totals[categoryId] ?: 0.0) + amount
-                        }
-                    }
+        getExpenses { expenses ->
+            val totals = expenses
+                .filter { exp ->
+                    // Matches your existing date filtering logic
+                    val parts = exp.date?.split("-")
+                    parts?.getOrNull(0)?.toIntOrNull() == year && parts?.getOrNull(1)?.toIntOrNull() == month
                 }
-                onResult(totals)
-            }
-            .addOnFailureListener { onResult(emptyMap()) }
+                .groupBy { it.categoryId ?: "Unknown" }
+                .mapValues { entry -> entry.value.sumOf { it.amount ?: 0.0 } }
+
+            onResult(totals)
+        }
+
     }
 
     fun setBudgetGoals(minGoalAmount: Long, maxGoalAmount: Long, onResult: (Boolean) -> Unit = {}) {

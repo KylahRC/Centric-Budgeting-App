@@ -59,8 +59,6 @@ class HomeActivity : AppCompatActivity() {
         pieChart = findViewById(R.id.pieChart)
         badgeIcon = findViewById(R.id.ivBadge)
 
-        // Setup Chart
-        setupPieChart()
 
         // Drawer Menu
         setupDrawer()
@@ -69,7 +67,7 @@ class HomeActivity : AppCompatActivity() {
         loadBalance()
         loadMoneyRemaining(currentYear, currentMonth)
         loadRecentExpenses(currentYear, currentMonth)
-
+        loadChartData()
         // Add Expense Button
         addExpenseButton.setOnClickListener {
             startActivity(Intent(this, AddExpenseActivity::class.java))
@@ -77,21 +75,19 @@ class HomeActivity : AppCompatActivity() {
     }
 
     // Helper function for Neo-Minimalist chart
-    private fun setupPieChart() {
-        // Dummy data for now - we will connect this to real category totals later
-        val entries = listOf(
-            PieEntry(50f, "Food"),
-            PieEntry(50f, "Rent")
-        )
+    private fun updatePieChart(categoryTotals: Map<String, Double>) {
+        val entries = categoryTotals.map { (category, total) ->
+            PieEntry(total.toFloat(), category) // Maps category name and total
+        }
 
         val dataSet = PieDataSet(entries, "Expenses")
-        // Using clean colors for the Neo-Minimalist look
-        dataSet.colors = listOf(0xFF6200EE.toInt(), 0xFF03DAC6.toInt())
+        dataSet.colors = listOf(0xFF6200EE.toInt(), 0xFF03DAC6.toInt(), 0xFFFF5722.toInt()) // Add more colors as needed
+        dataSet.sliceSpace = 3f
 
         val data = PieData(dataSet)
         pieChart.data = data
-        pieChart.description.isEnabled = false // Removes 'Description' text
-        pieChart.invalidate()
+        pieChart.description.isEnabled = false
+        pieChart.invalidate() // Refreshes the chart
     }
 
     private fun setupDrawer() {
@@ -99,11 +95,35 @@ class HomeActivity : AppCompatActivity() {
         navigationView.setNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> startActivity(Intent(this, HomeActivity::class.java))
-                R.id.nav_add_category -> startActivity(Intent(this, AddCategoryActivity::class.java))
+                R.id.nav_add_category -> startActivity(
+                    Intent(
+                        this,
+                        AddCategoryActivity::class.java
+                    )
+                )
+
                 R.id.nav_add_expense -> startActivity(Intent(this, AddExpenseActivity::class.java))
-                R.id.nav_budget_goals -> startActivity(Intent(this, BudgetGoalsActivity::class.java))
-                R.id.nav_view_expenses -> startActivity(Intent(this, ViewExpensesActivity::class.java))
-                R.id.nav_category_totals -> startActivity(Intent(this, CategoryTotalsActivity::class.java))
+                R.id.nav_budget_goals -> startActivity(
+                    Intent(
+                        this,
+                        BudgetGoalsActivity::class.java
+                    )
+                )
+
+                R.id.nav_view_expenses -> startActivity(
+                    Intent(
+                        this,
+                        ViewExpensesActivity::class.java
+                    )
+                )
+
+                R.id.nav_category_totals -> startActivity(
+                    Intent(
+                        this,
+                        CategoryTotalsActivity::class.java
+                    )
+                )
+
                 R.id.nav_logout -> {
                     FirebaseAuth.getInstance().signOut()
                     val intent = Intent(this, Login::class.java)
@@ -132,9 +152,19 @@ class HomeActivity : AppCompatActivity() {
             }
         }
     }
+    private fun loadChartData() {
+        FirebaseInteractions.getCategoryTotalsForMonth(currentYear, currentMonth) { totals ->
+            if (totals.isNotEmpty()) {
+                updatePieChart(totals)
+            } else {
+                Toast.makeText(this, "No data for this month!", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     private fun loadRecentExpenses(year: Int, month: Int) {
         FirebaseInteractions.getExpenses { expenses ->
+            // 1. Define filtered first
             val filtered = expenses.filter { exp ->
                 exp.date?.let {
                     val parts = it.split("-")
@@ -142,33 +172,48 @@ class HomeActivity : AppCompatActivity() {
                     val expMonth = parts.getOrNull(1)?.toIntOrNull()
                     expYear == year && expMonth == month
                 } ?: false
-            }.sortedByDescending { it.date }.take(5) // latest 5
+            }.sortedByDescending { it.date }.take(5)
 
-            recentExpensesLayout.removeAllViews()
+            // 2. Run the badge check
+            checkBadges(filtered.size)
 
-            for (exp in filtered) {
-                val expLayout = LinearLayout(this)
-                expLayout.orientation = LinearLayout.VERTICAL
-                expLayout.setPadding(0, 8, 0, 8)
+            // 3. Handle UI visibility
+            val emptyView = findViewById<TextView>(R.id.tvEmptyState)
+            if (filtered.isEmpty()) {
+                emptyView.visibility = View.VISIBLE
+                recentExpensesLayout.visibility = View.GONE
+            } else {
+                emptyView.visibility = View.GONE
+                recentExpensesLayout.visibility = View.VISIBLE
 
-                val descText = TextView(this)
-                descText.text = "${exp.date ?: ""} – ${exp.description ?: "No description"}"
-                descText.setTypeface(null, Typeface.BOLD)
-                expLayout.addView(descText)
+                recentExpensesLayout.removeAllViews()
 
-                val amountText = TextView(this)
-                amountText.text = "Amount: R${exp.amount ?: 0.0}"
-                expLayout.addView(amountText)
+                for (exp in filtered) {
+                    val expLayout = LinearLayout(this)
+                    expLayout.orientation = LinearLayout.VERTICAL
+                    expLayout.setPadding(0, 8, 0, 8)
 
-                recentExpensesLayout.addView(expLayout)
+                    val descText = TextView(this)
+                    descText.text = "${exp.date ?: ""} – ${exp.description ?: "No description"}"
+                    descText.setTypeface(null, Typeface.BOLD)
+                    expLayout.addView(descText)
+
+                    val amountText = TextView(this)
+                    amountText.text = "Amount: R${exp.amount ?: 0.0}"
+                    expLayout.addView(amountText)
+
+                    recentExpensesLayout.addView(expLayout)
+                }
             }
         }
     }
+
+    // This is now outside of loadRecentExpenses
     private fun checkBadges(expenseCount: Int) {
         if (expenseCount >= 10) {
-
             badgeIcon.visibility = View.VISIBLE
+        } else {
+            badgeIcon.visibility = View.GONE
         }
     }
 }
-
