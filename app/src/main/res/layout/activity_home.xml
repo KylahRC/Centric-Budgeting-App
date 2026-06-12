@@ -3,122 +3,110 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:theme="@style/AppTheme">
+    android:layout_height="match_parent">
 
-    <!-- Header -->
-    <include
-        layout="@layout/header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+    <include layout="@layout/header" />
 
-    <!-- Drawer -->
     <androidx.drawerlayout.widget.DrawerLayout
         android:id="@+id/drawerLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Main content -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/white">
+            android:background="#FAFAFA"> <com.github.mikephil.charting.charts.PieChart
+            android:id="@+id/pieChart"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Balance Heading -->
-
-            <!-- Balance Amount -->
-
-            <!-- Money Remaining Heading -->
             <TextView
                 android:id="@+id/tvBalanceHeading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Total Balance"
-                android:textSize="34sp"
-                android:textStyle="bold"
-                app:layout_constraintTop_toTopOf="parent"
+                android:textSize="18sp"
+                app:layout_constraintTop_toBottomOf="@id/pieChart"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                android:layout_marginTop="24dp"/>
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <TextView
                 android:id="@+id/tvBalanceAmount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="R0.00"
-                android:textSize="28sp"
+                android:textSize="32sp"
+                android:textStyle="bold"
                 app:layout_constraintTop_toBottomOf="@id/tvBalanceHeading"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                android:layout_marginTop="8dp"/>
+                app:layout_constraintEnd_toEndOf="parent"/>
 
-            <!-- Recent Expenses Heading -->
             <TextView
                 android:id="@+id/tvMoneyRemainingHeading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Money Remaining"
-                android:textSize="20sp"
-                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:textSize="14sp"
                 app:layout_constraintTop_toBottomOf="@id/tvBalanceAmount"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                android:layout_marginTop="24dp"/>
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <TextView
                 android:id="@+id/tvMoneyRemainingAmount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="R0.00"
-                android:textSize="18sp"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="#000000"
                 app:layout_constraintTop_toBottomOf="@id/tvMoneyRemainingHeading"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                android:layout_marginTop="8dp"/>
-
+                app:layout_constraintEnd_toEndOf="parent"/>
             <TextView
                 android:id="@+id/tvRecentExpensesHeading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Recent Expenses"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintTop_toBottomOf="@id/tvMoneyRemainingAmount"
-                app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginTop="32dp"
-                android:layout_marginStart="16dp"/>
+                android:layout_marginTop="24dp"
+                android:layout_marginStart="16dp"
+                app:layout_constraintTop_toBottomOf="@id/tvBalanceAmount"
+                app:layout_constraintStart_toStartOf="parent"/>
 
-            <!-- Recent Expenses List -->
             <LinearLayout
                 android:id="@+id/layoutRecentExpenses"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 app:layout_constraintTop_toBottomOf="@id/tvRecentExpensesHeading"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="8dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"/>
-
-            <!-- Add Expense Button -->
+                android:padding="16dp"/>
             <Button
                 android:id="@+id/btnAddExpense"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="16dp"
                 android:text="Add Expense"
+                android:backgroundTint="#000000"
+                android:textColor="#FFFFFF"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <ImageView
+                android:id="@+id/ivBadge"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/star_badge"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginBottom="32dp"
-                android:layout_marginEnd="32dp"/>
+                android:layout_margin="16dp" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <!-- Side Menu -->
         <com.google.android.material.navigation.NavigationView
             android:id="@+id/navigationView"
             android:layout_width="wrap_content"

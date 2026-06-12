@@ -18,6 +18,12 @@ import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import android.graphics.Typeface
+import com.github.mikephil.charting.charts.PieChart
+import com.github.mikephil.charting.data.PieData
+import com.github.mikephil.charting.data.PieDataSet
+import com.github.mikephil.charting.data.PieEntry
+import android.widget.ImageView // Needed for badgeIcon
+import android.view.View        // Needed for View.VISIBLE
 
 class HomeActivity : AppCompatActivity() {
 
@@ -30,6 +36,10 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var recentExpensesLayout: LinearLayout
     private lateinit var addExpenseButton: Button
 
+    private lateinit var pieChart: PieChart
+
+    private lateinit var badgeIcon: ImageView
+
     // Data
     private var currentYear = Calendar.getInstance().get(Calendar.YEAR)
     private var currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
@@ -38,7 +48,7 @@ class HomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
 
-        // --- Setup UI ---
+        //  Setup UI
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
         menuButton = findViewById(R.id.btnMenu)
@@ -46,19 +56,42 @@ class HomeActivity : AppCompatActivity() {
         moneyRemainingAmount = findViewById(R.id.tvMoneyRemainingAmount)
         recentExpensesLayout = findViewById(R.id.layoutRecentExpenses)
         addExpenseButton = findViewById(R.id.btnAddExpense)
+        pieChart = findViewById(R.id.pieChart)
+        badgeIcon = findViewById(R.id.ivBadge)
 
-        // --- Drawer Menu ---
+        // Setup Chart
+        setupPieChart()
+
+        // Drawer Menu
         setupDrawer()
 
-        // --- Load Data ---
+        // Load Data
         loadBalance()
         loadMoneyRemaining(currentYear, currentMonth)
         loadRecentExpenses(currentYear, currentMonth)
 
-        // --- Add Expense Button ---
+        // Add Expense Button
         addExpenseButton.setOnClickListener {
             startActivity(Intent(this, AddExpenseActivity::class.java))
         }
+    }
+
+    // Helper function for Neo-Minimalist chart
+    private fun setupPieChart() {
+        // Dummy data for now - we will connect this to real category totals later
+        val entries = listOf(
+            PieEntry(50f, "Food"),
+            PieEntry(50f, "Rent")
+        )
+
+        val dataSet = PieDataSet(entries, "Expenses")
+        // Using clean colors for the Neo-Minimalist look
+        dataSet.colors = listOf(0xFF6200EE.toInt(), 0xFF03DAC6.toInt())
+
+        val data = PieData(dataSet)
+        pieChart.data = data
+        pieChart.description.isEnabled = false // Removes 'Description' text
+        pieChart.invalidate()
     }
 
     private fun setupDrawer() {
@@ -129,6 +162,12 @@ class HomeActivity : AppCompatActivity() {
 
                 recentExpensesLayout.addView(expLayout)
             }
+        }
+    }
+    private fun checkBadges(expenseCount: Int) {
+        if (expenseCount >= 10) {
+
+            badgeIcon.visibility = View.VISIBLE
         }
     }
 }

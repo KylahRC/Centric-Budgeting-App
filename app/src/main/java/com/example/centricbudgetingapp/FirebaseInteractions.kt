@@ -269,21 +269,35 @@ object FirebaseInteractions {
                 onResult(minGoal, maxGoal)
             }
             .addOnFailureListener { onResult(null, null) }
-        }
-        // In your FirebaseInteractions.kt file, inside the object:
-        fun updateExpenseAmount(expenseId: String, newAmount: Double, callback: (Boolean) -> Unit) {
-            val userId = auth.currentUser?.uid ?: return callback(false)
-
-            // Correct Path: users/{userId}/expenses/{expenseId}
-            db.collection("users").document(userId).collection("expenses").document(expenseId)
-                .update("amount", newAmount)
-                .addOnSuccessListener { callback(true) }
-                .addOnFailureListener { e ->
-                    Log.e("FirebaseInteractions", "Error updating expense", e)
-                    callback(false)
-                }
-        }
-
-
     }
+
+    // In your FirebaseInteractions.kt file, inside the object:
+    fun updateExpenseAmount(expenseId: String, newAmount: Double, callback: (Boolean) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return callback(false)
+
+        // Correct Path: users/{userId}/expenses/{expenseId}
+        db.collection("users").document(userId).collection("expenses").document(expenseId)
+            .update("amount", newAmount)
+            .addOnSuccessListener { callback(true) }
+            .addOnFailureListener { e ->
+                Log.e("FirebaseInteractions", "Error updating expense", e)
+                callback(false)
+            }
+    }
+
+    fun getCombinedCategories(onResult: (List<String>) -> Unit) {
+        val standardCategories = listOf("Food", "Transport", "Rent", "Entertainment", "Utilities")
+
+        // This assumes your existing function is called getCategories
+        getCategories { customCategories ->
+            // Extract the names from your custom category objects
+            val customNames = customCategories.map { it.name ?: "Unnamed" }
+
+            // Merge the lists and remove duplicates
+            val allCategories = (standardCategories + customNames).distinct()
+            onResult(allCategories)
+        }
+    }
+
+}
 

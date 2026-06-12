@@ -69,19 +69,18 @@ class AddExpenseActivity : AppCompatActivity() {
         }
     }
 
-    private fun getCategories()
-    {
+    private fun getCategories() {
+        // Initialize UI components first
         categorySpinner = findViewById(R.id.spCategory)
         amountField = findViewById(R.id.etAmount)
         descriptionField = findViewById(R.id.etDescription)
         dateField = findViewById(R.id.etDate)
         saveButton = findViewById(R.id.btnSaveExpense)
 
-        FirebaseInteractions.getCategories { categories ->
-            val categoryNames = categories.map { it.name ?: "Unnamed" }
-            categoryIds = categories.map { it.id }
-
-            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categoryNames)
+        // Use the new combined logic
+        FirebaseInteractions.getCombinedCategories { allCategoryNames ->
+            // Update the adapter with the merged list
+            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, allCategoryNames)
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             categorySpinner.adapter = adapter
         }
