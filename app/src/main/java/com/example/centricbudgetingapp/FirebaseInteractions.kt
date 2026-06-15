@@ -11,159 +11,322 @@ object FirebaseInteractions {
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-    // --- User Info ---
+    //region User Info
+    // region getBalance
     fun getBalance(onResult: (Long?) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onResult(null)
         db.collection("users").document(userId).get()
             .addOnSuccessListener { doc -> onResult(doc.getLong("balance")) }
             .addOnFailureListener { onResult(null) }
     }
+    // endregion
 
+    // region getUsername
     fun getUsername(onResult: (String?) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onResult(null)
         db.collection("users").document(userId).get()
             .addOnSuccessListener { doc -> onResult(doc.getString("username")) }
             .addOnFailureListener { onResult(null) }
     }
+    //endregion
 
+    //region getEmail
     fun getEmail(onResult: (String?) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onResult(null)
         db.collection("users").document(userId).get()
             .addOnSuccessListener { doc -> onResult(doc.getString("email")) }
             .addOnFailureListener { onResult(null) }
     }
+    //endregion
 
+    //region getMinGoal
     fun getMinGoal(onResult: (Long?) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onResult(null)
         db.collection("users").document(userId).get()
             .addOnSuccessListener { doc -> onResult(doc.getLong("minGoal")) }
             .addOnFailureListener { onResult(null) }
     }
+    //endregion
 
+    //region getMaxGoal
     fun getMaxGoal(onResult: (Long?) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onResult(null)
         db.collection("users").document(userId).get()
             .addOnSuccessListener { doc -> onResult(doc.getLong("maxGoal")) }
             .addOnFailureListener { onResult(null) }
     }
+    //endregion
+    //endregion
 
-    fun getCategories(onResult: (List<Category>) -> Unit) {
-        val userId = auth.currentUser?.uid ?: return onResult(emptyList())
-        db.collection("users").document(userId).collection("categories").get()
-            .addOnSuccessListener { snap ->
-                val categories = snap.documents.map { doc ->
-                    Category(
-                        id = doc.id,
-                        name = doc.getString("name"),
-                        description = doc.getString("description")
-                    )
-                }
-                onResult(categories)
-            }
-            .addOnFailureListener { onResult(emptyList()) }
-    }
-
-    fun addCategory(name: String, description: String, onResult: (Boolean) -> Unit = {}) {
-        val userId = auth.currentUser?.uid ?: return onResult(false)
-        val userRef = db.collection("users").document(userId)
-
-        val category = mapOf(
-            "name" to name,
-            "description" to description
-        )
-
-        userRef.collection("categories").add(category)
-            .addOnSuccessListener { onResult(true) }
-            .addOnFailureListener { e ->
-                Log.e("FirebaseInteractions", "Error adding category", e)
-                onResult(false)
-            }
-    }
-
-    fun getExpenses(onResult: (List<Expense>) -> Unit) {
-        val userId = auth.currentUser?.uid ?: return onResult(emptyList())
-        db.collection("users").document(userId).collection("expenses").get()
-            .addOnSuccessListener { snap ->
-                val expenses = snap.documents.map { doc ->
-                    Expense(
-                        id = doc.id,
-                        amount = doc.getDouble("amount"),
-                        description = doc.getString("description"),
-                        categoryId = doc.getString("categoryId"),
-                        photoUrl = doc.getString("photoUrl"),
-                        date = doc.getString("date") // formatted string
-                    )
-                }
-                onResult(expenses)
-            }
-            .addOnFailureListener { onResult(emptyList()) }
-    }
-
-    fun addExpense(
-        amount: Double,
-        description: String,
-        categoryId: String,
-        date: String,
-        photoUrl: String? = null,
-        onResult: (Boolean) -> Unit = {}
-    ) {
-        val userId = auth.currentUser?.uid ?: return onResult(false)
-        val userRef = db.collection("users").document(userId)
-
-        val expense = mapOf(
-            "amount" to amount,
-            "description" to description,
-            "categoryId" to categoryId,
-            "date" to date,
-            "photoUrl" to (photoUrl ?: "")
-        )
-
-        userRef.collection("expenses").add(expense)
-            .addOnSuccessListener { onResult(true) }
-            .addOnFailureListener { e ->
-                Log.e("FirebaseInteractions", "Error adding expense", e)
-                onResult(false)
-            }
-    }
-    fun getCategoryMap(onResult: (Map<String, String>) -> Unit) {
-        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
-        db.collection("categories").get().addOnSuccessListener { snapshot ->
-            val categoryMap = mutableMapOf<String, String>()
-            for (doc in snapshot) {
-                val name = doc.getString("name") ?: "Unknown"
-                categoryMap[doc.id] = name // Map DocumentID -> Name
-            }
-            onResult(categoryMap)
-        }
-    }
-
-    fun addToBalance(amount: Long, onResult: (Long?) -> Unit) {
-        val userId = auth.currentUser?.uid ?: return onResult(null)
-        val userRef = db.collection("users").document(userId)
-
-        userRef.get().addOnSuccessListener { doc ->
-            if (doc != null && doc.exists()) {
-                val currentBalance = (doc.get("balance") as? Long) ?: 0L
-                val newBalance = currentBalance + amount
-
-                userRef.update("balance", newBalance)
-                    .addOnSuccessListener {
-                        Log.d("FirebaseInteractions", "Balance updated to $newBalance")
-                        onResult(newBalance)
+    //region Category Management
+        //region getCategories
+        fun getCategories(onResult: (List<Category>) -> Unit) {
+            val userId = auth.currentUser?.uid ?: return onResult(emptyList())
+            db.collection("users").document(userId).collection("categories").get()
+                .addOnSuccessListener { snap ->
+                    val categories = snap.documents.map { doc ->
+                        Category(
+                            id = doc.id,
+                            name = doc.getString("name"),
+                            description = doc.getString("description")
+                        )
                     }
-                    .addOnFailureListener { e ->
-                        Log.e("FirebaseInteractions", "Error updating balance", e)
-                        onResult(null)
-                    }
-            } else {
-                onResult(null)
-            }
-        }.addOnFailureListener { e ->
-            Log.e("FirebaseInteractions", "Error fetching balance", e)
-            onResult(null)
+                    onResult(categories)
+                }
+                .addOnFailureListener { onResult(emptyList()) }
         }
-    }
+        //endregion
 
+        //region addCategory
+        fun addCategory(name: String, description: String, onResult: (Boolean) -> Unit = {}) {
+            val userId = auth.currentUser?.uid ?: return onResult(false)
+            val userRef = db.collection("users").document(userId)
+
+            val category = mapOf(
+                "name" to name,
+                "description" to description
+            )
+
+            userRef.collection("categories").add(category)
+                .addOnSuccessListener { onResult(true) }
+                .addOnFailureListener { e ->
+                    Log.e("FirebaseInteractions", "Error adding category", e)
+                    onResult(false)
+                }
+        }
+        //endregion
+
+        //region createStarterCategory
+        fun createStarterCategory(uid: String, onResult: (Boolean) -> Unit = {}) {
+            val userRef = db.collection("users").document(uid)
+            val starterCategory = mapOf(
+                "name" to "General",
+                "description" to "Default category"
+            )
+
+            userRef.collection("categories").add(starterCategory)
+                .addOnSuccessListener { onResult(true) }
+                .addOnFailureListener { e ->
+                    Log.e("FirebaseInteractions", "Error creating starter category", e)
+                    onResult(false)
+                }
+        }
+        //endregion
+
+        //region createStandardCategories
+        fun createStandardCategories(uid: String) {
+            val userRef = db.collection("users").document(uid)
+            val standardCategories = listOf(
+                "Food" to "Expenses for meals and groceries",
+                "Transport" to "Travel and commuting costs",
+                "Rent" to "Housing or rental payments",
+                "Entertainment" to "Movies, games, leisure",
+                "Utilities" to "Electricity, water, internet"
+            )
+
+            for ((name, description) in standardCategories) {
+                val category = mapOf(
+                    "name" to name,
+                    "description" to description
+                )
+                userRef.collection("categories").add(category)
+            }
+        }
+    //endregion
+
+        //region getCombinedCategories
+        fun getCombinedCategories(onResult: (List<String>) -> Unit) {
+            val standardCategories = listOf("Food", "Transport", "Rent", "Entertainment", "Utilities")
+
+            getCategories { customCategories ->
+                val customNames = customCategories.map { it.name ?: "Unnamed" }
+                val allCategories = (standardCategories + customNames).distinct()
+                onResult(allCategories)
+            }
+        }
+        //endregion
+
+    //endregion
+
+    //region Expense Management
+        //region getExpenses
+        fun getExpenses(onResult: (List<Expense>) -> Unit) {
+            val userId = auth.currentUser?.uid ?: return onResult(emptyList())
+            db.collection("users").document(userId).collection("expenses").get()
+                .addOnSuccessListener { snap ->
+                    val expenses = snap.documents.map { doc ->
+                        Expense(
+                            id = doc.id,
+                            amount = doc.getDouble("amount"),
+                            description = doc.getString("description"),
+                            categoryId = doc.getString("categoryId"),
+                            photoUrl = doc.getString("photoUrl"),
+                            date = doc.getString("date") // formatted string
+                        )
+                    }
+                    onResult(expenses)
+                }
+                .addOnFailureListener { onResult(emptyList()) }
+        }
+    //endregion
+
+        //region addExpense
+        fun addExpense(
+            amount: Double,
+            description: String,
+            categoryId: String,
+            date: String,
+            photoUrl: String? = null,
+            onResult: (Boolean) -> Unit = {}
+        ) {
+            val userId = auth.currentUser?.uid ?: return onResult(false)
+            val userRef = db.collection("users").document(userId)
+
+            val expense = mapOf(
+                "amount" to amount,
+                "description" to description,
+                "categoryId" to categoryId,
+                "date" to date,
+                "photoUrl" to (photoUrl ?: "")
+            )
+
+            userRef.collection("expenses").add(expense)
+                .addOnSuccessListener { onResult(true) }
+                .addOnFailureListener { e ->
+                    Log.e("FirebaseInteractions", "Error adding expense", e)
+                    onResult(false)
+                }
+        }
+    //endregion
+
+        //region updateExpenseAmount
+        fun updateExpenseAmount(expenseId: String, newAmount: Double, callback: (Boolean) -> Unit) {
+            val userId = auth.currentUser?.uid ?: return callback(false)
+
+            db.collection("users").document(userId).collection("expenses").document(expenseId)
+                .update("amount", newAmount)
+                .addOnSuccessListener { callback(true) }
+                .addOnFailureListener { e ->
+                    Log.e("FirebaseInteractions", "Error updating expense", e)
+                    callback(false)
+                }
+        }
+    //endregion
+
+        //region getCategoryTotalsForMonth
+        fun getCategoryTotalsForMonth(year: Int, month: Int, onResult: (Map<String, Double>) -> Unit) {
+            getExpenses { expenses ->
+                val totals = expenses
+                    .filter { exp ->
+                        val parts = exp.date?.split("-")
+                        parts?.getOrNull(0)?.toIntOrNull() == year &&
+                                parts?.getOrNull(1)?.toIntOrNull() == month
+                    }
+                    .groupBy { it.categoryId ?: "Unknown" }
+                    .mapValues { entry -> entry.value.sumOf { it.amount ?: 0.0 } }
+
+                onResult(totals)
+            }
+        }
+    //endregion
+
+        //region createStarterExpense
+        fun createStarterExpense(uid: String, onResult: (Boolean) -> Unit = {}) {
+            val userRef = db.collection("users").document(uid)
+            val starterExpense = mapOf(
+                "description" to "Welcome Expense",
+                "amount" to 0.0,
+                "categoryId" to "General",
+                "photoUrl" to "",
+                "date" to "0000-00-00"
+            )
+
+            userRef.collection("expenses").add(starterExpense)
+                .addOnSuccessListener { onResult(true) }
+                .addOnFailureListener { e ->
+                    Log.e("FirebaseInteractions", "Error creating starter expense", e)
+                    onResult(false)
+                }
+        }
+    //endregion
+
+    //endregion
+
+    //region Budget Goals
+        //region setBudgetGoals
+        fun setBudgetGoals(minGoalAmount: Long, maxGoalAmount: Long, onResult: (Boolean) -> Unit = {}) {
+            val userId = auth.currentUser?.uid ?: return onResult(false)
+            val userRef = db.collection("users").document(userId)
+
+            val updates = mapOf(
+                "minGoal" to minGoalAmount,
+                "maxGoal" to maxGoalAmount
+            )
+
+            userRef.update(updates)
+                .addOnSuccessListener { onResult(true) }
+                .addOnFailureListener { e ->
+                    Log.e("FirebaseInteractions", "Error saving budget goals", e)
+                    onResult(false)
+                }
+        }
+    //endregion
+
+        //region getBudgetGoals
+        fun getBudgetGoals(onResult: (Long?, Long?) -> Unit) {
+            val userId = auth.currentUser?.uid ?: return onResult(null, null)
+            val userRef = db.collection("users").document(userId)
+
+            userRef.get()
+                .addOnSuccessListener { doc ->
+                    val minGoal = doc.getLong("minGoal")
+                    val maxGoal = doc.getLong("maxGoal")
+                    onResult(minGoal, maxGoal)
+                }
+                .addOnFailureListener { onResult(null, null) }
+        }
+    //endregion
+
+        //region setBudgetGoalsForCategory
+        fun setBudgetGoalsForCategory(
+            categoryId: String,
+            minGoal: Long?,
+            maxGoal: Long?,
+            onResult: (Boolean) -> Unit
+        ) {
+            val userId = auth.currentUser?.uid ?: return onResult(false)
+            val userRef = db.collection("users").document(userId)
+                .collection("categories").document(categoryId)
+
+            val updates = mutableMapOf<String, Any>()
+            minGoal?.let { updates["minGoal"] = it }
+            maxGoal?.let { updates["maxGoal"] = it }
+
+            userRef.update(updates)
+                .addOnSuccessListener { onResult(true) }
+                .addOnFailureListener { onResult(false) }
+        }
+    //endregion
+
+        //region getBudgetGoalsForCategory
+        fun getBudgetGoalsForCategory(categoryId: String, onResult: (Long?, Long?) -> Unit) {
+            val userId = auth.currentUser?.uid ?: return onResult(null, null)
+            val userRef = db.collection("users").document(userId)
+                .collection("categories").document(categoryId)
+
+            userRef.get()
+                .addOnSuccessListener { doc ->
+                    val minGoal = doc.getLong("minGoal")
+                    val maxGoal = doc.getLong("maxGoal")
+                    onResult(minGoal, maxGoal)
+                }
+                .addOnFailureListener { onResult(null, null) }
+        }
+    //endregion
+
+    //endregion
+
+    //region User Creation / Registration
     fun createUserDoc(
         uid: String,
         name: String,
@@ -195,163 +358,53 @@ object FirebaseInteractions {
                 onResult(false)
             }
     }
+    //endregion
 
+    //region Balance Management
+    fun addToBalance(amount: Long, onResult: (Long?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return onResult(null)
+        val userRef = db.collection("users").document(userId)
 
-    fun createStarterCategory(uid: String, onResult: (Boolean) -> Unit = {}) {
-        val userRef = db.collection("users").document(uid)
-        val starterCategory = mapOf(
-            "name" to "General",
-            "description" to "Default category"
-        )
+        userRef.get().addOnSuccessListener { doc ->
+            if (doc != null && doc.exists()) {
+                val currentBalance = (doc.get("balance") as? Long) ?: 0L
+                val newBalance = currentBalance + amount
 
-        userRef.collection("categories").add(starterCategory)
-            .addOnSuccessListener { onResult(true) }
-            .addOnFailureListener { e ->
-                Log.e("FirebaseInteractions", "Error creating starter category", e)
-                onResult(false)
+                userRef.update("balance", newBalance)
+                    .addOnSuccessListener {
+                        Log.d("FirebaseInteractions", "Balance updated to $newBalance")
+                        onResult(newBalance)
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("FirebaseInteractions", "Error updating balance", e)
+                        onResult(null)
+                    }
+            } else {
+                onResult(null)
             }
+        }.addOnFailureListener { e ->
+            Log.e("FirebaseInteractions", "Error fetching balance", e)
+            onResult(null)
+        }
     }
+    //endregion
 
-    fun createStandardCategories(uid: String) {
-        val userRef = db.collection("users").document(uid)
-        val standardCategories = listOf(
-            "Food" to "Expenses for meals and groceries",
-            "Transport" to "Travel and commuting costs",
-            "Rent" to "Housing or rental payments",
-            "Entertainment" to "Movies, games, leisure",
-            "Utilities" to "Electricity, water, internet"
-        )
-
-        for ((name, description) in standardCategories) {
-            val category = mapOf(
-                "name" to name,
-                "description" to description
-            )
-            userRef.collection("categories").add(category)
+    //region Utility / Misc
+    fun getCategoryMap(onResult: (Map<String, String>) -> Unit) {
+        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+        db.collection("categories").get().addOnSuccessListener { snapshot ->
+            val categoryMap = mutableMapOf<String, String>()
+            for (doc in snapshot) {
+                val name = doc.getString("name") ?: "Unknown"
+                categoryMap[doc.id] = name // Map DocumentID -> Name
+            }
+            onResult(categoryMap)
         }
     }
 
+    //endregion
 
-    fun createStarterExpense(uid: String, onResult: (Boolean) -> Unit = {}) {
-        val userRef = db.collection("users").document(uid)
-        val starterExpense = mapOf(
-            "description" to "Welcome Expense",
-            "amount" to 0.0,
-            "categoryId" to "General",
-            "photoUrl" to "",
-            "date" to "0000-00-00"
-        )
-
-        userRef.collection("expenses").add(starterExpense)
-            .addOnSuccessListener { onResult(true) }
-            .addOnFailureListener { e ->
-                Log.e("FirebaseInteractions", "Error creating starter expense", e)
-                onResult(false)
-            }
-    }
-
-    fun getCategoryTotalsForMonth(year: Int, month: Int, onResult: (Map<String, Double>) -> Unit) {
-        getExpenses { expenses ->
-            val totals = expenses
-                .filter { exp ->
-                    // Matches your existing date filtering logic
-                    val parts = exp.date?.split("-")
-                    parts?.getOrNull(0)?.toIntOrNull() == year && parts?.getOrNull(1)?.toIntOrNull() == month
-                }
-                .groupBy { it.categoryId ?: "Unknown" }
-                .mapValues { entry -> entry.value.sumOf { it.amount ?: 0.0 } }
-
-            onResult(totals)
-        }
-
-    }
-
-    fun setBudgetGoals(minGoalAmount: Long, maxGoalAmount: Long, onResult: (Boolean) -> Unit = {}) {
-        val userId = auth.currentUser?.uid ?: return onResult(false)
-        val userRef = db.collection("users").document(userId)
-
-        val updates = mapOf(
-            "minGoal" to minGoalAmount,
-            "maxGoal" to maxGoalAmount
-        )
-
-        userRef.update(updates)
-            .addOnSuccessListener { onResult(true) }
-            .addOnFailureListener { e ->
-                Log.e("FirebaseInteractions", "Error saving budget goals", e)
-                onResult(false)
-            }
-    }
-
-    fun getBudgetGoals(onResult: (Long?, Long?) -> Unit) {
-        val userId = auth.currentUser?.uid ?: return onResult(null, null)
-        val userRef = db.collection("users").document(userId)
-
-        userRef.get()
-            .addOnSuccessListener { doc ->
-                val minGoal = doc.getLong("minGoal")
-                val maxGoal = doc.getLong("maxGoal")
-                onResult(minGoal, maxGoal)
-            }
-            .addOnFailureListener { onResult(null, null) }
-    }
-
-    // In your FirebaseInteractions.kt file, inside the object:
-    fun updateExpenseAmount(expenseId: String, newAmount: Double, callback: (Boolean) -> Unit) {
-        val userId = auth.currentUser?.uid ?: return callback(false)
-
-        // Correct Path: users/{userId}/expenses/{expenseId}
-        db.collection("users").document(userId).collection("expenses").document(expenseId)
-            .update("amount", newAmount)
-            .addOnSuccessListener { callback(true) }
-            .addOnFailureListener { e ->
-                Log.e("FirebaseInteractions", "Error updating expense", e)
-                callback(false)
-            }
-    }
-
-    fun getCombinedCategories(onResult: (List<String>) -> Unit) {
-        val standardCategories = listOf("Food", "Transport", "Rent", "Entertainment", "Utilities")
-
-        // This assumes your existing function is called getCategories
-        getCategories { customCategories ->
-            // Extract the names from your custom category objects
-            val customNames = customCategories.map { it.name ?: "Unnamed" }
-
-            // Merge the lists and remove duplicates
-            val allCategories = (standardCategories + customNames).distinct()
-            onResult(allCategories)
-        }
-    }
-
-    fun setBudgetGoalsForCategory(categoryId: String, minGoal: Long?, maxGoal: Long?, onResult: (Boolean) -> Unit) {
-        val userId = auth.currentUser?.uid ?: return onResult(false)
-        val userRef = db.collection("users").document(userId)
-            .collection("categories").document(categoryId)
-
-        val updates = mutableMapOf<String, Any>()
-        minGoal?.let { updates["minGoal"] = it }
-        maxGoal?.let { updates["maxGoal"] = it }
-
-        userRef.update(updates)
-            .addOnSuccessListener { onResult(true) }
-            .addOnFailureListener { onResult(false) }
-    }
-
-    fun getBudgetGoalsForCategory(categoryId: String, onResult: (Long?, Long?) -> Unit) {
-        val userId = auth.currentUser?.uid ?: return onResult(null, null)
-        val userRef = db.collection("users").document(userId)
-            .collection("categories").document(categoryId)
-
-        userRef.get()
-            .addOnSuccessListener { doc ->
-                val minGoal = doc.getLong("minGoal")
-                val maxGoal = doc.getLong("maxGoal")
-                onResult(minGoal, maxGoal)
-            }
-            .addOnFailureListener { onResult(null, null) }
-    }
-
-
+    //region Unused / Legacy
+    // (Place any commented‑out or experimental functions here)
+    //endregion
 }
-
