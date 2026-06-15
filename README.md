@@ -86,5 +86,5 @@ Centric follows Neo‑Minimalism and Glassmorphism design trends.
 - https://youtu.be/Y7bBS8ovhMs?si=vf7fbvXqYUUIxKh3
 
 ###Part 3
-- LINK
+- https://youtu.be/n8d1xE5kGFw?si=ZurMGjwDWhEEfM1F
 
