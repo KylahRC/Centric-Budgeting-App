@@ -187,14 +187,23 @@ private fun moreMoney()
         }
     }
     private fun loadChartData() {
-        FirebaseInteractions.getCategoryTotalsForMonth(currentYear, currentMonth) { totals ->
-            if (totals.isNotEmpty()) {
-                updatePieChart(totals)
-            } else {
-                Toast.makeText(this, "No data for this month!", Toast.LENGTH_SHORT).show()
+        FirebaseInteractions.getCategories { categories ->
+            val categoryMap = categories.associate { it.id to (it.name ?: "Unnamed") }
+
+            FirebaseInteractions.getCategoryTotalsForMonth(currentYear, currentMonth) { totals ->
+                if (totals.isNotEmpty()) {
+                    // Convert IDs to names
+                    val namedTotals = totals.mapKeys { (catId, _) ->
+                        categoryMap[catId] ?: "Unknown"
+                    }
+                    updatePieChart(namedTotals)
+                } else {
+                    Toast.makeText(this, "No data for this month!", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
+
 
     private fun loadRecentExpenses(year: Int, month: Int) {
         FirebaseInteractions.getExpenses { expenses ->
