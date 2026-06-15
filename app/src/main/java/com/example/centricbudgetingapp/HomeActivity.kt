@@ -34,6 +34,7 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var balanceAmount: TextView
     private lateinit var moneyRemainingAmount: TextView
     private lateinit var recentExpensesLayout: LinearLayout
+    private lateinit var viewExpensesButton: Button
     private lateinit var addExpenseButton: Button
 
     private lateinit var addMoneyButton : Button
@@ -60,6 +61,7 @@ class HomeActivity : AppCompatActivity() {
         addExpenseButton = findViewById(R.id.btnAddExpense)
         pieChart = findViewById(R.id.pieChart)
         badgeIcon = findViewById(R.id.ivBadge)
+        viewExpensesButton = findViewById(R.id.btnViewExpenses)
 
 
         addMoneyButton.setOnClickListener {
@@ -92,6 +94,11 @@ class HomeActivity : AppCompatActivity() {
         // Add Expense Button
         addExpenseButton.setOnClickListener {
             startActivity(Intent(this, AddExpenseActivity::class.java))
+        }
+
+        // View Expenses Button
+        viewExpensesButton.setOnClickListener {
+            startActivity(Intent(this, ViewExpensesActivity::class.java))
         }
     }
 
@@ -129,20 +136,20 @@ private fun moreMoney()
                     )
                 )
 
-                R.id.nav_add_expense -> startActivity(Intent(this, AddExpenseActivity::class.java))
-                R.id.nav_budget_goals -> startActivity(
-                    Intent(
-                        this,
-                        BudgetGoalsActivity::class.java
-                    )
-                )
+//                R.id.nav_add_expense -> startActivity(Intent(this, AddExpenseActivity::class.java))
+//                R.id.nav_budget_goals -> startActivity(
+//                    Intent(
+//                        this,
+//                        BudgetGoalsActivity::class.java
+//                    )
+//                )
 
-                R.id.nav_view_expenses -> startActivity(
-                    Intent(
-                        this,
-                        ViewExpensesActivity::class.java
-                    )
-                )
+//                R.id.nav_view_expenses -> startActivity(
+//                    Intent(
+//                        this,
+//                        ViewExpensesActivity::class.java
+//                    )
+//                )
 
                 R.id.nav_category_totals -> startActivity(
                     Intent(

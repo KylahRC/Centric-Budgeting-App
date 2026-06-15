@@ -4,17 +4,18 @@
         android:id="@+id/nav_home"
         android:title="Home" />
     <item
+    android:id="@+id/nav_budget_goals"
+    android:title="Budget Goals"/>
+    <item
         android:id="@+id/nav_add_category"
         android:title="Add Category" />
-    <item
-        android:id="@+id/nav_budget_goals"
-        android:title="Budget Goals"/>
-    <item
-        android:id="@+id/nav_add_expense"
-        android:title="Add Expense"/>
-    <item
-        android:id="@+id/nav_view_expenses"
-        android:title="View Expenses"/>
+
+<!--    <item-->
+<!--        android:id="@+id/nav_add_expense"-->
+<!--        android:title="Add Expense"/>-->
+<!--    <item-->
+<!--        android:id="@+id/nav_view_expenses"-->
+<!--        android:title="View Expenses"/>-->
     <item
         android:id="@+id/nav_category_totals"
         android:title="Category Totals"/>

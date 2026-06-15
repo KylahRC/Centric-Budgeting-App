@@ -37,9 +37,9 @@ class ViewExpensesActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_home -> startActivity(Intent(this, HomeActivity::class.java))
                 R.id.nav_add_category -> startActivity(Intent(this, AddCategoryActivity::class.java))
-                R.id.nav_add_expense -> startActivity(Intent(this, AddExpenseActivity::class.java))
+                //R.id.nav_add_expense -> startActivity(Intent(this, AddExpenseActivity::class.java))
                 R.id.nav_budget_goals -> startActivity(Intent(this, BudgetGoalsActivity::class.java))
-                R.id.nav_view_expenses -> startActivity(Intent(this, ViewExpensesActivity::class.java))
+               // R.id.nav_view_expenses -> startActivity(Intent(this, ViewExpensesActivity::class.java))
                 R.id.nav_category_totals -> startActivity(Intent(this, CategoryTotalsActivity::class.java))
                 R.id.nav_split_expense -> startActivity(Intent(this, SplitExpenseActivity::class.java))
                 R.id.nav_logout -> {

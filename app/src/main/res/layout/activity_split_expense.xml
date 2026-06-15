@@ -1,29 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/tvTotalAmount"
+    <!-- Header bar -->
+    <include
+        layout="@layout/header"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Total Expense: R0.00"
-        android:textSize="18sp"
-        android:layout_marginBottom="16dp"/>
+        android:layout_height="wrap_content"/>
 
-    <EditText
-        android:id="@+id/etMyShare"
+    <!-- DrawerLayout must contain exactly two direct children: main content + NavigationView -->
+    <androidx.drawerlayout.widget.DrawerLayout
+        android:id="@+id/drawerLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Enter your share (e.g. 250)"
-        android:inputType="numberDecimal" />
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <Button
-        android:id="@+id/btnConfirmSplit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Confirm Split"
-        android:layout_marginTop="24dp"/>
-</LinearLayout>
+        <!-- Main content -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="24dp">
+
+            <TextView
+                android:id="@+id/tvTotalAmount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Total Expense: R0.00"
+                android:textSize="18sp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginBottom="16dp"/>
+
+            <EditText
+                android:id="@+id/etMyShare"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter your share (e.g. 250)"
+                android:inputType="numberDecimal"
+                app:layout_constraintTop_toBottomOf="@id/tvTotalAmount"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <Button
+                android:id="@+id/btnConfirmSplit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Confirm Split"
+                app:layout_constraintTop_toBottomOf="@id/etMyShare"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="24dp"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Navigation drawer -->
+        <com.google.android.material.navigation.NavigationView
+            android:id="@+id/navigationView"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            app:menu="@menu/nav_menu"/>
+    </androidx.drawerlayout.widget.DrawerLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
