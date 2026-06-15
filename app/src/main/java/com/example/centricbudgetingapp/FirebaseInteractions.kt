@@ -298,5 +298,34 @@ object FirebaseInteractions {
         }
     }
 
+    fun setBudgetGoalsForCategory(categoryId: String, minGoal: Long?, maxGoal: Long?, onResult: (Boolean) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return onResult(false)
+        val userRef = db.collection("users").document(userId)
+            .collection("categories").document(categoryId)
+
+        val updates = mutableMapOf<String, Any>()
+        minGoal?.let { updates["minGoal"] = it }
+        maxGoal?.let { updates["maxGoal"] = it }
+
+        userRef.update(updates)
+            .addOnSuccessListener { onResult(true) }
+            .addOnFailureListener { onResult(false) }
+    }
+
+    fun getBudgetGoalsForCategory(categoryId: String, onResult: (Long?, Long?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return onResult(null, null)
+        val userRef = db.collection("users").document(userId)
+            .collection("categories").document(categoryId)
+
+        userRef.get()
+            .addOnSuccessListener { doc ->
+                val minGoal = doc.getLong("minGoal")
+                val maxGoal = doc.getLong("maxGoal")
+                onResult(minGoal, maxGoal)
+            }
+            .addOnFailureListener { onResult(null, null) }
+    }
+
+
 }
 

@@ -2,35 +2,34 @@ package com.example.centricbudgetingapp
 
 import android.os.Bundle
 import android.content.Intent
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.EditText
-import android.text.InputType
-import android.widget.SeekBar
-import android.widget.TextView
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 
 class BudgetGoalsActivity : AppCompatActivity() {
 
-    // UI
+    // Drawer
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navigationView: NavigationView
     private lateinit var menuButton: ImageButton
-    private lateinit var balanceText: TextView
-    private lateinit var addMoneyButton: Button
-    private lateinit var seekMinGoal: SeekBar
-    private lateinit var seekMaxGoal: SeekBar
-    private lateinit var minGoalText: TextView
-    private lateinit var maxGoalText: TextView
+
+    // UI
+    private lateinit var categorySpinner: Spinner
+    private lateinit var switchMinGoal: SwitchCompat
+    private lateinit var switchMaxGoal: SwitchCompat
+    private lateinit var etMinGoal: TextInputEditText
+    private lateinit var etMaxGoal: TextInputEditText
     private lateinit var saveGoalsButton: Button
 
+    // Data
     private var currentBalance: Long = 0L
+    private var categories: List<Category> = emptyList()
+    private var selectedCategoryId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,103 +38,17 @@ class BudgetGoalsActivity : AppCompatActivity() {
         initUI()
         setupDrawer()
         loadBalance()
-        loadGoals()
-        setupAddMoney()
-        setupSliders()
+        loadCategories()
         setupSaveGoals()
     }
 
     private fun initUI() {
-        balanceText = findViewById(R.id.tvBalance)
-        addMoneyButton = findViewById(R.id.btnAddMoney)
-        seekMinGoal = findViewById(R.id.seekMinGoal)
-        seekMaxGoal = findViewById(R.id.seekMaxGoal)
-        minGoalText = findViewById(R.id.tvMinGoal)
-        maxGoalText = findViewById(R.id.tvMaxGoal)
+        categorySpinner = findViewById(R.id.spinnerBudgetCategory)
+        switchMinGoal = findViewById(R.id.switchMinGoal)
+        switchMaxGoal = findViewById(R.id.switchMaxGoal)
+        etMinGoal = findViewById(R.id.etMinGoal)
+        etMaxGoal = findViewById(R.id.etMaxGoal)
         saveGoalsButton = findViewById(R.id.btnSaveGoals)
-    }
-
-    private fun loadBalance() {
-        FirebaseInteractions.getBalance { balance ->
-            currentBalance = balance ?: 0L
-            balanceText.text = "Balance: R$currentBalance"
-            updateGoalTexts(seekMinGoal.progress, seekMaxGoal.progress)
-        }
-    }
-
-    private fun loadGoals() {
-        FirebaseInteractions.getBudgetGoals { minGoal, maxGoal ->
-            if (minGoal != null && maxGoal != null && currentBalance > 0) {
-                val minPercent = ((minGoal.toDouble() / currentBalance) * 100).toInt()
-                val maxPercent = ((maxGoal.toDouble() / currentBalance) * 100).toInt()
-                seekMinGoal.progress = minPercent
-                seekMaxGoal.progress = maxPercent
-                updateGoalTexts(minPercent, maxPercent)
-            }
-        }
-    }
-
-    private fun setupAddMoney() {
-        addMoneyButton.setOnClickListener {
-            val dialog = AlertDialog.Builder(this)
-            val input = EditText(this)
-            input.inputType = InputType.TYPE_CLASS_NUMBER
-            dialog.setTitle("Add Money")
-            dialog.setView(input)
-            dialog.setPositiveButton("Add") { _, _ ->
-                val amount = input.text.toString().toLongOrNull() ?: 0L
-                FirebaseInteractions.addToBalance(amount) { newBalance ->
-                    currentBalance = newBalance ?: currentBalance
-                    balanceText.text = "Balance: R$currentBalance"
-                    updateGoalTexts(seekMinGoal.progress, seekMaxGoal.progress)
-                }
-            }
-            dialog.setNegativeButton("Cancel", null)
-            dialog.show()
-        }
-    }
-
-
-    private fun setupSliders() {
-        val listener = object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                // Ensure Min doesn't exceed Max, and Max doesn't go below Min
-                if (seekBar == seekMinGoal && progress > seekMaxGoal.progress) {
-                    seekMaxGoal.progress = progress
-                } else if (seekBar == seekMaxGoal && progress < seekMinGoal.progress) {
-                    seekMinGoal.progress = progress
-                }
-                updateGoalTexts(seekMinGoal.progress, seekMaxGoal.progress)
-            }
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-        }
-
-        seekMinGoal.setOnSeekBarChangeListener(listener)
-        seekMaxGoal.setOnSeekBarChangeListener(listener)
-    }
-
-
-    private fun setupSaveGoals() {
-        saveGoalsButton.setOnClickListener {
-            val minPercent = seekMinGoal.progress
-            val maxPercent = seekMaxGoal.progress
-            val minAmount = (currentBalance * minPercent / 100)
-            val maxAmount = (currentBalance * maxPercent / 100)
-
-            FirebaseInteractions.setBudgetGoals(minAmount, maxAmount) { success ->
-                val msg = if (success) "Goals saved!" else "Failed to save goals"
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    private fun updateGoalTexts(minPercent: Int, maxPercent: Int) {
-        val minAmount = (currentBalance * minPercent / 100)
-        val maxAmount = (currentBalance * maxPercent / 100)
-
-        minGoalText.text = "Min Goal: $minPercent% (R$minAmount)"
-        maxGoalText.text = "Max Goal: $maxPercent% (R$maxAmount)"
     }
 
     private fun setupDrawer() {
@@ -152,7 +65,6 @@ class BudgetGoalsActivity : AppCompatActivity() {
                 R.id.nav_budget_goals -> startActivity(Intent(this, BudgetGoalsActivity::class.java))
                 R.id.nav_view_expenses -> startActivity(Intent(this, ViewExpensesActivity::class.java))
                 R.id.nav_category_totals -> startActivity(Intent(this, CategoryTotalsActivity::class.java))
-                R.id.nav_split_expense -> startActivity(Intent(this, SplitExpenseActivity::class.java))
                 R.id.nav_logout -> {
                     FirebaseAuth.getInstance().signOut()
                     val intent = Intent(this, Login::class.java)
@@ -163,6 +75,64 @@ class BudgetGoalsActivity : AppCompatActivity() {
             }
             drawerLayout.closeDrawer(GravityCompat.START)
             true
+        }
+    }
+
+    private fun loadBalance() {
+        FirebaseInteractions.getBalance { balance ->
+            currentBalance = balance ?: 0L
+        }
+    }
+
+    private fun loadCategories() {
+        FirebaseInteractions.getCategories { cats ->
+            categories = cats
+            val names = cats.map { it.name ?: "Unnamed" }
+            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, names)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            categorySpinner.adapter = adapter
+
+            categorySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>, view: android.view.View?, position: Int, id: Long) {
+                    selectedCategoryId = categories[position].id
+                    loadGoalsForCategory(selectedCategoryId!!)
+                }
+                override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
+        }
+    }
+
+    private fun loadGoalsForCategory(categoryId: String) {
+        FirebaseInteractions.getBudgetGoalsForCategory(categoryId) { minGoal, maxGoal ->
+            if (minGoal != null) {
+                switchMinGoal.isChecked = true
+                etMinGoal.setText(minGoal.toString())
+            } else {
+                switchMinGoal.isChecked = false
+                etMinGoal.setText("")
+            }
+
+            if (maxGoal != null) {
+                switchMaxGoal.isChecked = true
+                etMaxGoal.setText(maxGoal.toString())
+            } else {
+                switchMaxGoal.isChecked = false
+                etMaxGoal.setText("")
+            }
+        }
+    }
+
+    private fun setupSaveGoals() {
+        saveGoalsButton.setOnClickListener {
+            val categoryId = selectedCategoryId ?: return@setOnClickListener
+
+            val minGoal = if (switchMinGoal.isChecked) etMinGoal.text.toString().toLongOrNull() else null
+            val maxGoal = if (switchMaxGoal.isChecked) etMaxGoal.text.toString().toLongOrNull() else null
+
+            FirebaseInteractions.setBudgetGoalsForCategory(categoryId, minGoal, maxGoal) { success ->
+                val msg = if (success) "Goals saved!" else "Failed to save goals"
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }
