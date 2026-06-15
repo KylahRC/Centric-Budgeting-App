@@ -136,6 +136,7 @@ object FirebaseInteractions {
             onResult(categoryMap)
         }
     }
+
     fun addToBalance(amount: Long, onResult: (Long?) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onResult(null)
         val userRef = db.collection("users").document(userId)
