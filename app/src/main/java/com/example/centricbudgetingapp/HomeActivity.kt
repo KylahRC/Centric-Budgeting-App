@@ -36,6 +36,7 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var recentExpensesLayout: LinearLayout
     private lateinit var addExpenseButton: Button
 
+    private lateinit var addMoneyButton : Button
     private lateinit var pieChart: PieChart
 
     private lateinit var badgeIcon: ImageView
@@ -53,12 +54,32 @@ class HomeActivity : AppCompatActivity() {
         navigationView = findViewById(R.id.navigationView)
         menuButton = findViewById(R.id.btnMenu)
         balanceAmount = findViewById(R.id.tvBalanceAmount)
+        addMoneyButton = findViewById(R.id.btnAddBalance)
         moneyRemainingAmount = findViewById(R.id.tvMoneyRemainingAmount)
         recentExpensesLayout = findViewById(R.id.layoutRecentExpenses)
         addExpenseButton = findViewById(R.id.btnAddExpense)
         pieChart = findViewById(R.id.pieChart)
         badgeIcon = findViewById(R.id.ivBadge)
 
+
+        addMoneyButton.setOnClickListener {
+            val dialog = AlertDialog.Builder(this)
+            val input = EditText(this)
+            input.inputType = InputType.TYPE_CLASS_NUMBER
+            dialog.setTitle("Add Money")
+            dialog.setView(input)
+            dialog.setPositiveButton("Add") { _, _ ->
+                val amount = input.text.toString().toLongOrNull() ?: 0L
+                FirebaseInteractions.addToBalance(amount) { newBalance ->
+                    val updatedBalance = newBalance ?: 0L
+                    balanceAmount.text = "R$updatedBalance"
+                    // Refresh money remaining after adding
+                    loadMoneyRemaining(currentYear, currentMonth)
+                }
+            }
+            dialog.setNegativeButton("Cancel", null)
+            dialog.show()
+        }
 
         // Drawer Menu
         setupDrawer()
@@ -73,6 +94,12 @@ class HomeActivity : AppCompatActivity() {
             startActivity(Intent(this, AddExpenseActivity::class.java))
         }
     }
+
+// Add Money Button
+private fun moreMoney()
+{
+
+}
 
     // Helper function for Neo-Minimalist chart
     private fun updatePieChart(categoryTotals: Map<String, Double>) {

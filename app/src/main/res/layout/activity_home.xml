@@ -14,6 +14,7 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="#FAFAFA"> <com.github.mikephil.charting.charts.PieChart
@@ -66,6 +67,22 @@
                 app:layout_constraintTop_toBottomOf="@id/tvMoneyRemainingHeading"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"/>
+
+            <Button
+                android:id="@+id/btnAddBalance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:layout_marginBottom="140dp"
+                android:backgroundTint="#000000"
+                android:text="Add Money"
+                android:textColor="#FFFFFF"
+                android:layout_marginTop="12dp"
+                app:layout_constraintTop_toBottomOf="@id/tvMoneyRemainingAmount"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+
+
             <TextView
                 android:id="@+id/tvRecentExpensesHeading"
                 android:layout_width="wrap_content"
@@ -73,8 +90,10 @@
                 android:text="Recent Expenses"
                 android:layout_marginTop="24dp"
                 android:layout_marginStart="16dp"
-                app:layout_constraintTop_toBottomOf="@id/tvBalanceAmount"
+                app:layout_constraintTop_toBottomOf="@id/btnAddBalance"
                 app:layout_constraintStart_toStartOf="parent"/>
+
+
 
             <LinearLayout
                 android:id="@+id/layoutRecentExpenses"
@@ -83,17 +102,21 @@
                 android:orientation="vertical"
                 app:layout_constraintTop_toBottomOf="@id/tvRecentExpensesHeading"
                 android:padding="16dp"/>
+
             <Button
                 android:id="@+id/btnAddExpense"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
-                android:text="Add Expense"
+                android:layout_marginBottom="140dp"
                 android:backgroundTint="#000000"
+                android:text="Add Expense"
                 android:textColor="#FFFFFF"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/layoutRecentExpenses"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent" />
 
             <ImageView
                 android:id="@+id/ivBadge"
@@ -128,3 +151,4 @@
             app:menu="@menu/nav_menu"/>
     </androidx.drawerlayout.widget.DrawerLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
