@@ -82,22 +82,17 @@ class AddExpenseActivity : AppCompatActivity() {
     private fun getCategories() {
         categorySpinner = findViewById(R.id.spCategory)
 
-        FirebaseInteractions.getCategories { customCategories ->
-            // Standard categories don't have DB IDs, so we use their names as IDs
-            val standardNames = listOf("Food", "Transport", "Rent", "Entertainment", "Utilities")
-            val customNames = customCategories.map { it.name ?: "Unnamed" }
+        FirebaseInteractions.getCategories { categories ->
+            val names = categories.map { it.name ?: "Unnamed" }
+            val ids = categories.map { it.id ?: "" }
 
-            // Combine names for the spinner
-            val allNames = (standardNames + customNames).distinct()
+            categoryIds = ids
 
-            // Map names to their corresponding IDs
-            // For standard ones, ID is the name. For custom ones, use the real ID.
-            categoryIds = standardNames + customCategories.map { it.id ?: "" }
-
-            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, allNames)
+            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, names)
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             categorySpinner.adapter = adapter
         }
+
     }
 
     @SuppressLint("DefaultLocale")
