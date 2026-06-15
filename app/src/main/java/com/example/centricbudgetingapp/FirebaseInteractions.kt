@@ -185,12 +185,17 @@ object FirebaseInteractions {
         )
 
         userRef.set(userDoc)
-            .addOnSuccessListener { onResult(true) }
+            .addOnSuccessListener {
+                // After creating the user doc, seed categories
+                createStandardCategories(uid)
+                onResult(true)
+            }
             .addOnFailureListener { e ->
                 Log.e("FirebaseInteractions", "Error creating user doc", e)
                 onResult(false)
             }
     }
+
 
     fun createStarterCategory(uid: String, onResult: (Boolean) -> Unit = {}) {
         val userRef = db.collection("users").document(uid)
@@ -206,6 +211,26 @@ object FirebaseInteractions {
                 onResult(false)
             }
     }
+
+    fun createStandardCategories(uid: String) {
+        val userRef = db.collection("users").document(uid)
+        val standardCategories = listOf(
+            "Food" to "Expenses for meals and groceries",
+            "Transport" to "Travel and commuting costs",
+            "Rent" to "Housing or rental payments",
+            "Entertainment" to "Movies, games, leisure",
+            "Utilities" to "Electricity, water, internet"
+        )
+
+        for ((name, description) in standardCategories) {
+            val category = mapOf(
+                "name" to name,
+                "description" to description
+            )
+            userRef.collection("categories").add(category)
+        }
+    }
+
 
     fun createStarterExpense(uid: String, onResult: (Boolean) -> Unit = {}) {
         val userRef = db.collection("users").document(uid)

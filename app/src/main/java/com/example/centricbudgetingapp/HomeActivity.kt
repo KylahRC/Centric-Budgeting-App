@@ -53,7 +53,7 @@ class HomeActivity : AppCompatActivity() {
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
         menuButton = findViewById(R.id.btnMenu)
-        //balanceAmount = findViewById(R.id.tvBalanceAmount)
+        balanceAmount = findViewById(R.id.tvBalanceAmount)
         addMoneyButton = findViewById(R.id.btnAddBalance)
         moneyRemainingAmount = findViewById(R.id.tvMoneyRemainingAmount)
         recentExpensesLayout = findViewById(R.id.layoutRecentExpenses)
