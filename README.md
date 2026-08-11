@@ -3,11 +3,10 @@
 # Centric Budgeting App
 
 ## Purpose
-Centric is a personal budgeting application designed for South African students who face challenges like shared living expenses, invisible digital spending, and subscription fatigue. 
-
+As a student, staying on top of finances is a constant struggle to balance. Most existing budgeting apps are designed for full-time salary earners with fixed monthly incomes which completely overlooks the real-world reality of a student. Some students are living off of bursaries like NSFAS allowances some are getting any money that their families can give in order to survive, this sometimes leads to students splitting groceries with roommates while trying to track micro-expenses on the go and still save. When the assessment guideline required building a budgeting app, the goal was not to create just another generic template, it was to build Centric to directly address these exact pain points, transforming a standard academic project into a practical, student-focused tool that makes shared living costs and personal allowance management easier and accessible.
 The app helps users:
 
-- Register securely and manage thier own financial profile.
+- Register securely and manage their own financial profile.
 
 - Track expenses by category with CRUD functionality (create, read, update, delete).
 
